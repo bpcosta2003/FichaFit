@@ -1,0 +1,38 @@
+# Dependências
+/node_modules
+
+# Next.js
+/.next/
+/out/
+next-env.d.ts
+
+# Produção
+/build
+
+# Variáveis de ambiente — NUNCA commitar credenciais
+.env*.local
+.env
+
+# Vercel
+.vercel
+
+# Testes
+/coverage
+/playwright-report/
+/test-results/
+
+# PWA — gerados pelo next-pwa no build
+public/sw.js
+public/sw.js.map
+public/workbox-*.js
+public/workbox-*.js.map
+
+# TypeScript
+*.tsbuildinfo
+
+# Supabase local
+supabase/.temp
+supabase/.branches
+
+# Sistema
+.DS_Store

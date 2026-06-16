@@ -6,7 +6,7 @@ import dynamic from 'next/dynamic';
 const FichaListagem = dynamic(
   () =>
     import('@/modules/fichas/presentation/FichaListagem').then((modulo) => modulo.FichaListagem),
-  { ssr: false, loading: () => <p className="px-4 py-8 text-center text-gray-500">Carregando…</p> }
+  { ssr: false, loading: () => <p className="px-5 py-8 text-center text-texto-suave">Carregando…</p> }
 );
 
 export default function PaginaTreinos() {

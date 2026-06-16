@@ -8,14 +8,17 @@ const DELAY_CONCLUSAO_MS = 500;
 
 export interface Timer {
   segundosRestantes: number;
+  total: number;
   ativo: boolean;
   iniciar: (segundos: number) => void;
+  ajustar: (delta: number) => void;
   pular: () => void;
   cancelar: () => void;
 }
 
 export function useTimer(aoCompletar?: () => void): Timer {
   const [segundosRestantes, setSegundosRestantes] = useState(0);
+  const [total, setTotal] = useState(0);
   const [ativo, setAtivo] = useState(false);
   const aoCompletarRef = useRef(aoCompletar);
   aoCompletarRef.current = aoCompletar;
@@ -38,8 +41,20 @@ export function useTimer(aoCompletar?: () => void): Timer {
   }, [ativo, segundosRestantes]);
 
   const iniciar = useCallback((segundos: number) => {
-    setSegundosRestantes(Math.max(0, Math.round(segundos)));
+    const valor = Math.max(0, Math.round(segundos));
+    setSegundosRestantes(valor);
+    setTotal(valor);
     setAtivo(true);
+  }, []);
+
+  // Ajusta o tempo restante (botões −15s / +15s). Mantém o total
+  // sincronizado quando o usuário adiciona tempo acima do original.
+  const ajustar = useCallback((delta: number) => {
+    setSegundosRestantes((atual) => {
+      const novo = Math.max(0, atual + delta);
+      setTotal((totalAtual) => Math.max(totalAtual, novo));
+      return novo;
+    });
   }, []);
 
   // Pula o descanso e avança imediatamente.
@@ -54,5 +69,5 @@ export function useTimer(aoCompletar?: () => void): Timer {
     setSegundosRestantes(0);
   }, []);
 
-  return { segundosRestantes, ativo, iniciar, pular, cancelar };
+  return { segundosRestantes, total, ativo, iniciar, ajustar, pular, cancelar };
 }

@@ -1,4 +1,4 @@
-// Gera ícones PNG placeholder (quadrado roxo com halter estilizado).
+// Gera ícones PNG placeholder (tema Ember: halter âmbar sobre fundo escuro).
 // Substituir por arte final antes do lançamento público.
 // Uso: node scripts/gerar-icones.mjs
 import { deflateSync } from 'node:zlib';
@@ -6,8 +6,8 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const ROXO = [0x8b, 0x5c, 0xf6];
-const BRANCO = [0xff, 0xff, 0xff];
+const FUNDO = [0x12, 0x10, 0x10];
+const FOGO = [0xf5, 0x9e, 0x0b];
 
 const tabelaCrc = (() => {
   const tabela = new Int32Array(256);
@@ -45,7 +45,7 @@ function corDoPixel(x, y, tamanho) {
   const barra = cy > 0.46 && cy < 0.54 && cx > 0.2 && cx < 0.8;
   const anilhaEsq = cx > 0.16 && cx < 0.3 && cy > 0.3 && cy < 0.7;
   const anilhaDir = cx > 0.7 && cx < 0.84 && cy > 0.3 && cy < 0.7;
-  return barra || anilhaEsq || anilhaDir ? BRANCO : ROXO;
+  return barra || anilhaEsq || anilhaDir ? FOGO : FUNDO;
 }
 
 function gerarPng(tamanho) {

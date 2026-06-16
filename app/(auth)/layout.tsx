@@ -9,7 +9,7 @@ export default function LayoutComNavegacao({ children }: { children: React.React
   const pathname = usePathname();
   const emSessao = pathname.includes('/sessao');
   return (
-    <div className={`mx-auto min-h-dvh max-w-md ${emSessao ? '' : 'pb-24'}`}>
+    <div className={`mx-auto min-h-dvh max-w-md bg-fundo ${emSessao ? '' : 'pb-24'}`}>
       <BannerOffline />
       {children}
       <NavInferior />

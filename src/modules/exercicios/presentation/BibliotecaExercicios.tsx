@@ -1,17 +1,34 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useMemo, useState, type FormEvent } from 'react';
 
 import { useExercicios } from '@/modules/exercicios/application/useExercicios';
 import { BotaoGrande } from '@/shared/components/BotaoGrande';
+
+const TODOS = 'Todos';
+
+const CLASSE_INPUT =
+  'min-h-toque rounded-xl border border-borda bg-superficie-2 px-4 text-base text-texto outline-none placeholder:text-texto-suave focus:border-fogo';
 
 export function BibliotecaExercicios() {
   const { exercicios, carregando, erro, importando, buscar, criarCustom, importarCatalogoWger } =
     useExercicios();
   const [termo, setTermo] = useState('');
+  const [grupo, setGrupo] = useState(TODOS);
   const [adicionando, setAdicionando] = useState(false);
   const [nomeNovo, setNomeNovo] = useState('');
   const [grupoNovo, setGrupoNovo] = useState('');
+
+  // Grupos musculares distintos presentes no catálogo — viram chips de filtro.
+  const grupos = useMemo(() => {
+    const distintos = new Set<string>();
+    for (const ex of exercicios) {
+      if (ex.grupoMuscular) {
+        distintos.add(ex.grupoMuscular);
+      }
+    }
+    return [TODOS, ...Array.from(distintos).sort((a, b) => a.localeCompare(b, 'pt-BR'))];
+  }, [exercicios]);
 
   const aoCriar = async (evento: FormEvent): Promise<void> => {
     evento.preventDefault();
@@ -26,22 +43,62 @@ export function BibliotecaExercicios() {
   };
 
   if (carregando) {
-    return <p className="px-4 py-8 text-center text-gray-500">Carregando exercícios…</p>;
+    return <p className="px-5 py-8 text-center text-texto-suave">Carregando exercícios…</p>;
   }
 
-  const filtrados = buscar(termo);
+  const filtrados = buscar(termo).filter(
+    (ex) => grupo === TODOS || ex.grupoMuscular === grupo
+  );
 
   return (
-    <div className="flex flex-col gap-4 px-4 py-6">
-      <h1 className="text-2xl font-bold text-gray-900">Exercícios</h1>
+    <div className="flex flex-col gap-4 px-5 py-6">
+      <h1 className="font-titulo text-5xl font-bold uppercase leading-[0.9] tracking-tight text-texto">
+        Exercícios
+      </h1>
 
-      <input
-        type="search"
-        placeholder="Buscar exercício…"
-        value={termo}
-        onChange={(evento) => setTermo(evento.target.value)}
-        className="min-h-toque rounded-xl border border-gray-300 px-4 text-base outline-none focus:border-primaria-500"
-      />
+      <div className="relative">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2}
+          aria-hidden="true"
+          className="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-texto-suave"
+        >
+          <circle cx="11" cy="11" r="7" />
+          <path d="M21 21l-4-4" strokeLinecap="round" />
+        </svg>
+        <input
+          type="search"
+          placeholder="Buscar exercício…"
+          value={termo}
+          onChange={(evento) => setTermo(evento.target.value)}
+          className={`${CLASSE_INPUT} w-full pl-11`}
+        />
+      </div>
+
+      {grupos.length > 1 && (
+        <div className="flex flex-wrap gap-2">
+          {grupos.map((g) => {
+            const ativo = g === grupo;
+            return (
+              <button
+                key={g}
+                type="button"
+                aria-pressed={ativo}
+                onClick={() => setGrupo(g)}
+                className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+                  ativo
+                    ? 'gradiente-fogo text-black'
+                    : 'border border-borda bg-superficie text-texto-suave active:bg-superficie-2'
+                }`}
+              >
+                {g}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {erro !== null && (
         <p role="alert" className="text-sm font-medium text-erro">
@@ -50,32 +107,41 @@ export function BibliotecaExercicios() {
       )}
 
       {exercicios.length === 0 ? (
-        <div className="flex flex-col items-center gap-4 rounded-2xl bg-gray-50 px-6 py-10 text-center">
-          <span aria-hidden="true" className="text-4xl">
-            📚
-          </span>
-          <p className="text-gray-600">
+        <div className="flex flex-col items-center gap-4 rounded-2xl border border-borda bg-superficie px-6 py-10 text-center">
+          <p className="text-texto-suave">
             A biblioteca está vazia. Baixe o catálogo de exercícios ou crie o seu próprio.
           </p>
           <BotaoGrande onClick={() => void importarCatalogoWger()} disabled={importando}>
-            {importando ? 'Baixando catálogo…' : 'Baixar catálogo de exercícios'}
+            {importando ? 'Baixando catálogo…' : 'Baixar catálogo'}
           </BotaoGrande>
         </div>
       ) : filtrados.length === 0 ? (
-        <p className="rounded-2xl bg-gray-50 px-6 py-8 text-center text-gray-600">
-          Nenhum exercício encontrado para “{termo}”. Tente outro nome ou crie um exercício novo.
+        <p className="rounded-2xl border border-borda bg-superficie px-6 py-8 text-center text-texto-suave">
+          Nenhum exercício encontrado. Tente outro nome ou crie um exercício novo.
         </p>
       ) : (
         <ul className="flex flex-col gap-2">
           {filtrados.map((exercicio) => (
             <li
               key={exercicio.id}
-              className="flex min-h-toque flex-col justify-center rounded-xl border border-gray-200 bg-white px-4 py-3"
+              className="flex min-h-toque items-center gap-3 rounded-xl border border-borda bg-superficie px-4 py-3"
             >
-              <span className="font-medium text-gray-900">{exercicio.nome}</span>
-              <span className="text-sm text-gray-500">
-                {exercicio.grupoMuscular ?? 'Grupo não informado'}
-                {exercicio.isCustom && ' · criado por você'}
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-superficie-2 text-fogo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" className="h-5 w-5" aria-hidden="true">
+                  <path d="M6.5 8v8M17.5 8v8M4 10h2.5M17.5 10H20M4 14h2.5M17.5 14H20M6.5 12h11" />
+                </svg>
+              </div>
+              <div className="flex flex-1 flex-col">
+                <span className="font-titulo font-semibold uppercase tracking-tight text-texto">
+                  {exercicio.nome}
+                </span>
+                <span className="text-sm text-texto-suave">
+                  {exercicio.grupoMuscular ?? 'Grupo não informado'}
+                  {exercicio.isCustom && ' · criado por você'}
+                </span>
+              </div>
+              <span aria-hidden="true" className="text-texto-suave">
+                ›
               </span>
             </li>
           ))}
@@ -83,20 +149,23 @@ export function BibliotecaExercicios() {
       )}
 
       {adicionando ? (
-        <form onSubmit={(evento) => void aoCriar(evento)} className="flex flex-col gap-3">
+        <form
+          onSubmit={(evento) => void aoCriar(evento)}
+          className="flex flex-col gap-3 rounded-2xl border border-borda bg-superficie p-4"
+        >
           <input
             autoFocus
             required
             placeholder="Nome do exercício"
             value={nomeNovo}
             onChange={(evento) => setNomeNovo(evento.target.value)}
-            className="min-h-toque rounded-xl border border-gray-300 px-4 text-base outline-none focus:border-primaria-500"
+            className={CLASSE_INPUT}
           />
           <input
             placeholder="Grupo muscular (opcional)"
             value={grupoNovo}
             onChange={(evento) => setGrupoNovo(evento.target.value)}
-            className="min-h-toque rounded-xl border border-gray-300 px-4 text-base outline-none focus:border-primaria-500"
+            className={CLASSE_INPUT}
           />
           <BotaoGrande type="submit">Salvar exercício</BotaoGrande>
           <BotaoGrande type="button" variante="secundaria" onClick={() => setAdicionando(false)}>
@@ -104,9 +173,14 @@ export function BibliotecaExercicios() {
           </BotaoGrande>
         </form>
       ) : (
-        <BotaoGrande variante="secundaria" onClick={() => setAdicionando(true)}>
-          Criar exercício próprio
-        </BotaoGrande>
+        <button
+          type="button"
+          aria-label="Criar exercício próprio"
+          onClick={() => setAdicionando(true)}
+          className="gradiente-fogo fixed bottom-24 right-5 z-30 flex h-16 w-16 items-center justify-center rounded-full text-3xl font-bold text-black shadow-fogo active:scale-95"
+        >
+          +
+        </button>
       )}
     </div>
   );

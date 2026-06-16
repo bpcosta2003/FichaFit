@@ -32,13 +32,16 @@ export function ModalConfirmacao({
       role="dialog"
       aria-modal="true"
       aria-labelledby="titulo-modal-confirmacao"
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-4"
     >
-      <div className="w-full max-w-md rounded-2xl bg-white p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
-        <h2 id="titulo-modal-confirmacao" className="text-xl font-bold text-gray-900">
+      <div className="w-full max-w-md rounded-2xl border border-borda bg-superficie p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+        <h2
+          id="titulo-modal-confirmacao"
+          className="font-titulo text-2xl font-bold uppercase tracking-tight text-texto"
+        >
           {titulo}
         </h2>
-        <p className="mt-2 text-gray-600">{descricao}</p>
+        <p className="mt-2 text-texto-suave">{descricao}</p>
         <div className="mt-6 flex flex-col gap-3">
           <BotaoGrande variante={perigo ? 'perigo' : 'primaria'} onClick={aoConfirmar}>
             {rotuloConfirmar}

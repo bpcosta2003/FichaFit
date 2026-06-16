@@ -11,7 +11,7 @@ const FichaTreinoPage = dynamic(
   {
     ssr: false,
     loading: () => (
-      <p className="px-4 py-8 text-center text-gray-500">Carregando treino…</p>
+      <p className="px-5 py-8 text-center text-texto-suave">Carregando treino…</p>
     ),
   }
 );

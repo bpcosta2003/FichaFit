@@ -1,23 +1,34 @@
 import type { Config } from 'tailwindcss';
 
+// Tema EMBER — Âmbar & Fogo. Cores semânticas via CSS variables (tema
+// claro/escuro alternável); o âmbar/fogo é fixo nos dois temas.
 const config: Config = {
-  content: [
-    './app/**/*.{ts,tsx}',
-    './src/**/*.{ts,tsx}',
-  ],
+  content: ['./app/**/*.{ts,tsx}', './src/**/*.{ts,tsx}'],
   theme: {
     extend: {
       colors: {
-        primaria: {
-          50: '#F5F3FF',
-          100: '#EDE9FE',
-          500: '#8B5CF6',
-          600: '#7C3AED',
-          700: '#6D28D9',
+        fundo: 'var(--cor-fundo)',
+        superficie: 'var(--cor-superficie)',
+        'superficie-2': 'var(--cor-superficie-2)',
+        texto: 'var(--cor-texto)',
+        'texto-suave': 'var(--cor-texto-suave)',
+        borda: 'var(--cor-borda)',
+        fogo: {
+          DEFAULT: '#F59E0B',
+          claro: '#FB923C',
+          escuro: '#D97706',
         },
         sucesso: '#22C55E',
-        alerta: '#F59E0B',
         erro: '#EF4444',
+      },
+      fontFamily: {
+        sans: ['var(--fonte-texto)', 'system-ui', 'sans-serif'],
+        titulo: ['var(--fonte-titulo)', 'system-ui', 'sans-serif'],
+        numero: ['var(--fonte-numero)', 'system-ui', 'sans-serif'],
+      },
+      boxShadow: {
+        // Brilho do âmbar — usado no FAB e em destaques (estilo pôster).
+        fogo: '0 8px 24px -6px rgba(245, 158, 11, 0.5)',
       },
       minHeight: {
         toque: '48px',

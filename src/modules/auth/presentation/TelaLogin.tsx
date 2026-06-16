@@ -30,10 +30,12 @@ export function TelaLogin() {
   };
 
   return (
-    <div className="mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-8 px-6">
+    <div className="mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-8 bg-fundo px-6">
       <div className="text-center">
-        <h1 className="text-3xl font-bold text-primaria-600">FichaFit</h1>
-        <p className="mt-2 text-gray-600">
+        <h1 className="font-titulo text-6xl font-bold uppercase tracking-tight text-fogo">
+          FichaFit
+        </h1>
+        <p className="mt-2 text-texto-suave">
           Entre com seu email para sincronizar seus treinos entre aparelhos.
         </p>
       </div>
@@ -43,15 +45,19 @@ export function TelaLogin() {
           <span aria-hidden="true" className="text-4xl">
             📬
           </span>
-          <p className="text-lg font-semibold text-gray-900">Link enviado!</p>
-          <p className="text-gray-600">
+          <p className="font-titulo text-xl font-semibold uppercase tracking-tight text-texto">
+            Link enviado!
+          </p>
+          <p className="text-texto-suave">
             Confira sua caixa de entrada e toque no link para entrar. Pode fechar esta tela.
           </p>
         </div>
       ) : (
         <form onSubmit={(evento) => void aoEnviar(evento)} className="flex flex-col gap-4">
           <label className="flex flex-col gap-1">
-            <span className="text-sm font-medium text-gray-700">Email</span>
+            <span className="font-titulo text-xs font-semibold uppercase tracking-widest text-texto-suave">
+              Email
+            </span>
             <input
               type="email"
               required
@@ -59,7 +65,7 @@ export function TelaLogin() {
               placeholder="voce@exemplo.com"
               value={email}
               onChange={(evento) => setEmail(evento.target.value)}
-              className="min-h-toque rounded-xl border border-gray-300 px-4 text-base outline-none focus:border-primaria-500"
+              className="min-h-toque rounded-xl border border-borda bg-superficie-2 px-4 text-base text-texto outline-none placeholder:text-texto-suave focus:border-fogo"
             />
           </label>
           {erro !== null && (
@@ -73,9 +79,9 @@ export function TelaLogin() {
         </form>
       )}
 
-      <p className="text-center text-sm text-gray-500">
+      <p className="text-center text-sm text-texto-suave">
         Você pode usar o app sem conta — o login só é necessário para sincronizar.{' '}
-        <Link href="/treinos" className="font-semibold text-primaria-600">
+        <Link href="/treinos" className="font-semibold text-fogo">
           Continuar sem entrar
         </Link>
       </p>

@@ -16,14 +16,14 @@ export function ProgressoSessao({ concluidos, total }: PropsProgressoSessao) {
         aria-valuemax={total}
         aria-valuenow={concluidos}
         aria-label="Progresso da sessão"
-        className="h-2.5 flex-1 overflow-hidden rounded-full bg-gray-200"
+        className="h-2 flex-1 overflow-hidden rounded-full bg-superficie-2"
       >
         <div
-          className="h-full rounded-full bg-primaria-500 transition-all"
+          className="gradiente-fogo h-full rounded-full transition-all"
           style={{ width: `${Math.round(proporcao * 100)}%` }}
         />
       </div>
-      <span className="text-sm font-semibold text-gray-700">
+      <span className="font-titulo text-sm font-semibold uppercase tracking-wide text-texto-suave">
         {concluidos}/{total}
       </span>
     </div>

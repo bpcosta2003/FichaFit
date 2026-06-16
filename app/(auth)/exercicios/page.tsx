@@ -7,7 +7,7 @@ const BibliotecaExercicios = dynamic(
     import('@/modules/exercicios/presentation/BibliotecaExercicios').then(
       (modulo) => modulo.BibliotecaExercicios
     ),
-  { ssr: false, loading: () => <p className="px-4 py-8 text-center text-gray-500">Carregando…</p> }
+  { ssr: false, loading: () => <p className="px-5 py-8 text-center text-texto-suave">Carregando…</p> }
 );
 
 export default function PaginaExercicios() {

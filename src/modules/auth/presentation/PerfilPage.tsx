@@ -7,6 +7,7 @@ import { useAuth } from '@/modules/auth/application/useAuth';
 import { atualizarPerfil, obterPerfil } from '@/modules/auth/infrastructure/supabaseAuth';
 import { AvatarUsuario } from '@/shared/components/AvatarUsuario';
 import { BotaoGrande } from '@/shared/components/BotaoGrande';
+import { SeletorTema } from '@/shared/components/SeletorTema';
 import { useSync } from '@/shared/hooks/useSync';
 import { AVATARES, AVATAR_PADRAO_ID } from '@/shared/types/avatares';
 import { formatarDataRelativa } from '@/shared/utils/formatacao';
@@ -51,28 +52,41 @@ export function PerfilPage() {
   };
 
   if (carregando) {
-    return <p className="px-4 py-8 text-center text-gray-500">Carregando perfil…</p>;
+    return <p className="px-5 py-8 text-center text-texto-suave">Carregando perfil…</p>;
   }
 
   return (
-    <div className="flex flex-col gap-6 px-4 py-6">
-      <h1 className="text-2xl font-bold text-gray-900">Perfil</h1>
+    <div className="flex flex-col gap-6 px-5 py-6">
+      <h1 className="font-titulo text-5xl font-bold uppercase leading-[0.9] tracking-tight text-texto">
+        Perfil
+      </h1>
 
-      <div className="flex items-center gap-4">
-        <AvatarUsuario avatarId={avatarId} tamanho="lg" />
+      <div className="flex items-center gap-4 rounded-2xl border border-borda bg-superficie p-4">
+        <AvatarUsuario avatarId={avatarId} tamanho="md" />
         <div className="flex flex-col">
-          <span className="text-lg font-semibold text-gray-900">
+          <span className="font-titulo text-lg font-bold uppercase tracking-tight text-texto">
             {autenticado ? (usuario?.email ?? 'Atleta') : 'Atleta local'}
           </span>
-          <span className="text-sm text-gray-500">
-            {autenticado ? 'Conta sincronizada' : 'Usando sem conta — dados só neste aparelho'}
+          <span className="text-sm text-texto-suave">
+            {autenticado
+              ? 'Conta sincronizada'
+              : 'Usando sem conta — dados só neste aparelho'}
           </span>
         </div>
       </div>
 
+      <section className="flex flex-col gap-2">
+        <h2 className="font-titulo text-xs font-semibold uppercase tracking-widest text-texto-suave">
+          Tema
+        </h2>
+        <SeletorTema />
+      </section>
+
       <section className="flex flex-col gap-3">
-        <h2 className="font-semibold text-gray-900">Escolha seu avatar</h2>
-        <div className="grid grid-cols-4 gap-3">
+        <h2 className="font-titulo text-xs font-semibold uppercase tracking-widest text-texto-suave">
+          Escolha seu avatar
+        </h2>
+        <div className="grid grid-cols-5 gap-3">
           {AVATARES.map((avatar) => (
             <button
               key={avatar.id}
@@ -80,8 +94,8 @@ export function PerfilPage() {
               aria-label={`Avatar ${avatar.nome}`}
               aria-pressed={avatar.id === avatarId}
               onClick={() => aoEscolherAvatar(avatar.id)}
-              className={`flex min-h-toque min-w-toque items-center justify-center rounded-2xl border-2 p-1 ${
-                avatar.id === avatarId ? 'border-primaria-500' : 'border-transparent'
+              className={`flex min-h-toque min-w-toque items-center justify-center rounded-2xl border-2 p-0.5 ${
+                avatar.id === avatarId ? 'border-fogo' : 'border-transparent'
               }`}
             >
               <AvatarUsuario avatarId={avatar.id} tamanho="sm" />
@@ -90,9 +104,11 @@ export function PerfilPage() {
         </div>
       </section>
 
-      <section className="flex flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-4">
-        <h2 className="font-semibold text-gray-900">Sincronização</h2>
-        <p className="text-sm text-gray-600">
+      <section className="flex flex-col gap-3 rounded-2xl border border-borda bg-superficie p-4">
+        <h2 className="font-titulo text-sm font-semibold uppercase tracking-wide text-texto">
+          Sincronização
+        </h2>
+        <p className="text-sm text-texto-suave">
           {pendentes === 0
             ? 'Tudo sincronizado.'
             : pendentes === 1

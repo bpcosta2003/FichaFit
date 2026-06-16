@@ -31,6 +31,9 @@ const FORMULARIO_VAZIO: FormularioExercicio = {
   descansoSegundos: 90,
 };
 
+const CLASSE_INPUT =
+  'min-h-toque rounded-xl border border-borda bg-superficie-2 px-4 text-base text-texto outline-none placeholder:text-texto-suave focus:border-fogo';
+
 export function FichaDetalhe({ fichaId }: PropsFichaDetalhe) {
   const router = useRouter();
   const { ficha, carregando, incluirExercicio, excluirExercicio, mover, deletarFicha } =
@@ -41,13 +44,13 @@ export function FichaDetalhe({ fichaId }: PropsFichaDetalhe) {
   const [confirmandoExclusao, setConfirmandoExclusao] = useState(false);
 
   if (carregando) {
-    return <p className="px-4 py-8 text-center text-gray-500">Carregando ficha…</p>;
+    return <p className="px-5 py-8 text-center text-texto-suave">Carregando ficha…</p>;
   }
 
   if (ficha === null) {
     return (
-      <div className="flex flex-col gap-4 px-4 py-8 text-center">
-        <p className="text-gray-600">Ficha não encontrada.</p>
+      <div className="flex flex-col gap-4 px-5 py-8 text-center">
+        <p className="text-texto-suave">Ficha não encontrada.</p>
         <BotaoGrande variante="secundaria" onClick={() => router.push('/treinos')}>
           Voltar para as fichas
         </BotaoGrande>
@@ -83,12 +86,26 @@ export function FichaDetalhe({ fichaId }: PropsFichaDetalhe) {
   };
 
   return (
-    <div className="flex flex-col gap-5 px-4 py-6">
-      <h1 className="text-2xl font-bold text-gray-900">{ficha.nome}</h1>
+    <div className="flex flex-col gap-5 px-5 py-6">
+      <header className="flex items-center gap-2">
+        <button
+          type="button"
+          aria-label="Voltar"
+          onClick={() => router.push('/treinos')}
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-texto-suave active:bg-superficie"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-6 w-6" aria-hidden="true">
+            <path d="M15 6l-6 6 6 6" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+        <h1 className="font-titulo text-3xl font-bold uppercase leading-none tracking-tight text-texto">
+          {ficha.nome}
+        </h1>
+      </header>
 
       {exercicios.length === 0 && !adicionando && (
-        <div className="flex flex-col items-center gap-3 rounded-2xl bg-gray-50 px-6 py-8 text-center">
-          <p className="text-gray-600">
+        <div className="flex flex-col items-center gap-3 rounded-2xl border border-borda bg-superficie px-6 py-8 text-center">
+          <p className="text-texto-suave">
             Esta ficha ainda não tem exercícios. Adicione o primeiro para poder treinar.
           </p>
         </div>
@@ -98,13 +115,14 @@ export function FichaDetalhe({ fichaId }: PropsFichaDetalhe) {
         {exercicios.map((exercicio, indice) => (
           <li
             key={exercicio.id}
-            className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white p-4"
+            className="flex items-center gap-3 rounded-2xl border border-borda bg-superficie p-4"
           >
             <div className="flex flex-1 flex-col gap-0.5">
-              <span className="font-semibold text-gray-900">{exercicio.nome}</span>
-              <span className="text-sm text-gray-500">
-                {exercicio.series} séries · {exercicio.repeticoesMin}–{exercicio.repeticoesMax}{' '}
-                reps
+              <span className="font-titulo text-lg font-semibold uppercase tracking-tight text-texto">
+                {exercicio.nome}
+              </span>
+              <span className="text-sm text-texto-suave">
+                {exercicio.series} séries · {exercicio.repeticoesMin}–{exercicio.repeticoesMax} reps
                 {exercicio.cargaReferenciaKg !== null &&
                   ` · ${formatarPesoKg(exercicio.cargaReferenciaKg)}`}{' '}
                 · {exercicio.descansoSegundos}s descanso
@@ -116,7 +134,7 @@ export function FichaDetalhe({ fichaId }: PropsFichaDetalhe) {
                 aria-label={`Mover ${exercicio.nome} para cima`}
                 disabled={indice === 0}
                 onClick={() => void mover(exercicio.id, 'cima')}
-                className="min-h-toque min-w-toque text-gray-400 disabled:opacity-30"
+                className="min-h-toque min-w-toque text-texto-suave disabled:opacity-30"
               >
                 ↑
               </button>
@@ -125,7 +143,7 @@ export function FichaDetalhe({ fichaId }: PropsFichaDetalhe) {
                 aria-label={`Mover ${exercicio.nome} para baixo`}
                 disabled={indice === exercicios.length - 1}
                 onClick={() => void mover(exercicio.id, 'baixo')}
-                className="min-h-toque min-w-toque text-gray-400 disabled:opacity-30"
+                className="min-h-toque min-w-toque text-texto-suave disabled:opacity-30"
               >
                 ↓
               </button>
@@ -143,17 +161,20 @@ export function FichaDetalhe({ fichaId }: PropsFichaDetalhe) {
       </ul>
 
       {adicionando ? (
-        <form onSubmit={(evento) => void aoAdicionar(evento)} className="flex flex-col gap-3">
+        <form
+          onSubmit={(evento) => void aoAdicionar(evento)}
+          className="flex flex-col gap-3 rounded-2xl border border-borda bg-superficie p-4"
+        >
           <input
             autoFocus
             required
             placeholder="Nome do exercício (ex: Supino Reto)"
             value={formulario.nome}
             onChange={(evento) => setFormulario({ ...formulario, nome: evento.target.value })}
-            className="min-h-toque rounded-xl border border-gray-300 px-4 text-base outline-none focus:border-primaria-500"
+            className={CLASSE_INPUT}
           />
           <div className="grid grid-cols-2 gap-3">
-            <label className="flex flex-col gap-1 text-sm font-medium text-gray-600">
+            <label className="flex flex-col gap-1 text-sm font-medium text-texto-suave">
               Séries
               <input
                 type="number"
@@ -163,10 +184,10 @@ export function FichaDetalhe({ fichaId }: PropsFichaDetalhe) {
                 onChange={(evento) =>
                   setFormulario({ ...formulario, series: Number(evento.target.value) })
                 }
-                className="min-h-toque rounded-xl border border-gray-300 px-4 text-base outline-none focus:border-primaria-500"
+                className={CLASSE_INPUT}
               />
             </label>
-            <label className="flex flex-col gap-1 text-sm font-medium text-gray-600">
+            <label className="flex flex-col gap-1 text-sm font-medium text-texto-suave">
               Descanso (s)
               <input
                 type="number"
@@ -177,10 +198,10 @@ export function FichaDetalhe({ fichaId }: PropsFichaDetalhe) {
                 onChange={(evento) =>
                   setFormulario({ ...formulario, descansoSegundos: Number(evento.target.value) })
                 }
-                className="min-h-toque rounded-xl border border-gray-300 px-4 text-base outline-none focus:border-primaria-500"
+                className={CLASSE_INPUT}
               />
             </label>
-            <label className="flex flex-col gap-1 text-sm font-medium text-gray-600">
+            <label className="flex flex-col gap-1 text-sm font-medium text-texto-suave">
               Reps mín.
               <input
                 type="number"
@@ -190,10 +211,10 @@ export function FichaDetalhe({ fichaId }: PropsFichaDetalhe) {
                 onChange={(evento) =>
                   setFormulario({ ...formulario, repeticoesMin: Number(evento.target.value) })
                 }
-                className="min-h-toque rounded-xl border border-gray-300 px-4 text-base outline-none focus:border-primaria-500"
+                className={CLASSE_INPUT}
               />
             </label>
-            <label className="flex flex-col gap-1 text-sm font-medium text-gray-600">
+            <label className="flex flex-col gap-1 text-sm font-medium text-texto-suave">
               Reps máx.
               <input
                 type="number"
@@ -203,11 +224,11 @@ export function FichaDetalhe({ fichaId }: PropsFichaDetalhe) {
                 onChange={(evento) =>
                   setFormulario({ ...formulario, repeticoesMax: Number(evento.target.value) })
                 }
-                className="min-h-toque rounded-xl border border-gray-300 px-4 text-base outline-none focus:border-primaria-500"
+                className={CLASSE_INPUT}
               />
             </label>
           </div>
-          <label className="flex flex-col gap-1 text-sm font-medium text-gray-600">
+          <label className="flex flex-col gap-1 text-sm font-medium text-texto-suave">
             Carga de referência (kg) — opcional
             <input
               type="text"
@@ -217,7 +238,7 @@ export function FichaDetalhe({ fichaId }: PropsFichaDetalhe) {
               onChange={(evento) =>
                 setFormulario({ ...formulario, cargaReferenciaKg: evento.target.value })
               }
-              className="min-h-toque rounded-xl border border-gray-300 px-4 text-base outline-none focus:border-primaria-500"
+              className={CLASSE_INPUT}
             />
           </label>
           {erro !== null && (

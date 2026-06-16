@@ -21,9 +21,14 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  // suppressHydrationWarning: extensões de navegador (ex: LanguageTool, que
+  // injeta data-lt-installed) alteram <html>/<body> antes da hidratação.
+  // Suprime o aviso apenas nesses elementos — não mascara mismatches reais na árvore.
   return (
-    <html lang="pt-BR">
-      <body className="font-sans">{children}</body>
+    <html lang="pt-BR" suppressHydrationWarning>
+      <body className="font-sans" suppressHydrationWarning>
+        {children}
+      </body>
     </html>
   );
 }

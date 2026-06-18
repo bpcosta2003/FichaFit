@@ -20,6 +20,14 @@ export interface ExercicioFicha {
   observacoes: string | null;
 }
 
+// Texto explicativo gerado pela assistente de IA, guardado junto da ficha
+// para o usuário relembrar depois por que aquele treino foi escolhido.
+export interface JustificativaIA {
+  porqueDoTreino: string;
+  comoEvoluir: string;
+  nivelAssertividade: string;
+}
+
 export interface FichaTreino {
   id: string;
   usuarioId: string;
@@ -27,6 +35,7 @@ export interface FichaTreino {
   descricao: string | null;
   grupoId: string | null;
   exercicios: ExercicioFicha[];
+  justificativaIA: JustificativaIA | null;
   criadoEm: string;
   atualizadoEm: string;
   deletadoEm: string | null;
@@ -37,6 +46,7 @@ export interface NovaFicha {
   usuarioId: string;
   descricao?: string;
   grupoId?: string | null;
+  justificativaIA?: JustificativaIA | null;
 }
 
 export interface EdicaoFicha {
@@ -72,6 +82,7 @@ export function criarFicha(dados: NovaFicha): FichaTreino {
     descricao: dados.descricao?.trim() || null,
     grupoId: dados.grupoId ?? null,
     exercicios: [],
+    justificativaIA: dados.justificativaIA ?? null,
     criadoEm: agora,
     atualizadoEm: agora,
     deletadoEm: null,

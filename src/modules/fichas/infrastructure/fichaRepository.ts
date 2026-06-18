@@ -19,6 +19,12 @@ const esquemaExercicioFicha = z.object({
   observacoes: z.string().nullable(),
 });
 
+const esquemaJustificativaIA = z.object({
+  porqueDoTreino: z.string(),
+  comoEvoluir: z.string(),
+  nivelAssertividade: z.string(),
+});
+
 const esquemaFicha = z.object({
   id: z.string(),
   usuarioId: z.string(),
@@ -26,6 +32,7 @@ const esquemaFicha = z.object({
   descricao: z.string().nullable(),
   grupoId: z.string().nullable().default(null),
   exercicios: z.array(esquemaExercicioFicha),
+  justificativaIA: esquemaJustificativaIA.nullable().default(null),
   criadoEm: z.string(),
   atualizadoEm: z.string(),
   deletadoEm: z.string().nullable(),

@@ -3,7 +3,13 @@
 import { useCallback, useState } from 'react';
 
 import { useAuth } from '@/modules/auth/application/useAuth';
-import { adicionarExercicio, atribuirGrupo, criarFicha, type FichaTreino } from '../domain/FichaTreino';
+import {
+  adicionarExercicio,
+  atribuirGrupo,
+  criarFicha,
+  type FichaTreino,
+  type JustificativaIA,
+} from '../domain/FichaTreino';
 import { criarGrupoFicha } from '../domain/GrupoFicha';
 import { salvarFicha } from '../infrastructure/fichaRepository';
 import { salvarGrupoFicha } from '../infrastructure/grupoFichaRepository';
@@ -23,11 +29,7 @@ export interface FichaGeradaIA {
   exercicios: ExercicioGeradoIA[];
 }
 
-export interface JustificativaIA {
-  porqueDoTreino: string;
-  comoEvoluir: string;
-  nivelAssertividade: string;
-}
+export type { JustificativaIA };
 
 const MENSAGENS_ERRO: Record<string, string> = {
   NAO_AUTENTICADO: 'Entre com seu email para usar a assistente de IA.',
@@ -112,6 +114,7 @@ export function useAssistenteIA(): EstadoAssistenteIA {
         nome: fichaGerada.nome,
         usuarioId,
         descricao: fichaGerada.descricao ?? undefined,
+        justificativaIA: justificativa,
       });
       if (grupoId !== null) {
         ficha = atribuirGrupo(ficha, grupoId);
@@ -123,7 +126,7 @@ export function useAssistenteIA(): EstadoAssistenteIA {
       fichasCriadas.push(ficha);
     }
     return fichasCriadas;
-  }, [fichasGeradas, usuarioId]);
+  }, [fichasGeradas, justificativa, usuarioId]);
 
   return {
     gerando,

@@ -12,7 +12,10 @@ function respostaErro(erro: string, codigo: string, status: number): NextRespons
 
 // POST /api/exercicios-seed — importa o catálogo wger (executar 1x após deploy,
 // autenticado no app). Upsert por wger_id evita duplicatas.
-export async function POST(): Promise<NextResponse> {
+// POST /api/exercicios-seed?forcar=true — força a reimportação mesmo que o
+// catálogo já tenha sido importado, corrigindo registros com traduções erradas
+// ou ausentes (ex.: importados antes de uma correção no parser do wger).
+export async function POST(requisicao: Request): Promise<NextResponse> {
   try {
     const supabase = createSupabaseServerClient();
     const {
@@ -23,6 +26,7 @@ export async function POST(): Promise<NextResponse> {
     }
 
     const admin = criarSupabaseAdmin();
+    const forcar = new URL(requisicao.url).searchParams.get('forcar') === 'true';
 
     const { count, error: erroContagem } = await admin
       .from('exercicio_definicoes')
@@ -31,7 +35,7 @@ export async function POST(): Promise<NextResponse> {
     if (erroContagem) {
       return respostaErro('Falha ao consultar o catálogo existente.', 'ERRO_CONSULTA', 500);
     }
-    if ((count ?? 0) >= MINIMO_CATALOGO) {
+    if (!forcar && (count ?? 0) >= MINIMO_CATALOGO) {
       return NextResponse.json({
         mensagem: 'Catálogo já importado anteriormente.',
         total: count,
@@ -43,10 +47,25 @@ export async function POST(): Promise<NextResponse> {
       return respostaErro('A API wger não retornou exercícios.', 'WGER_VAZIO', 502);
     }
 
+    // Mapa wger_id -> id existente: reaproveita o id ao atualizar para não
+    // duplicar registros (e não quebrar referências de exercicios_ficha).
+    const { data: existentes, error: erroExistentes } = await admin
+      .from('exercicio_definicoes')
+      .select('id, wger_id')
+      .not('wger_id', 'is', null);
+    if (erroExistentes) {
+      return respostaErro('Falha ao consultar o catálogo existente.', 'ERRO_CONSULTA', 500);
+    }
+    const idsPorWgerId = new Map(
+      (existentes ?? [])
+        .filter((registro): registro is { id: string; wger_id: number } => registro.wger_id !== null)
+        .map((registro) => [registro.wger_id, registro.id])
+    );
+
     const agora = new Date().toISOString();
     const { error: erroUpsert } = await admin.from('exercicio_definicoes').upsert(
       exercicios.map((exercicio) => ({
-        id: uuidv4(),
+        id: idsPorWgerId.get(exercicio.wgerId) ?? uuidv4(),
         wger_id: exercicio.wgerId,
         nome: exercicio.nome,
         grupo_muscular: exercicio.grupoMuscular,

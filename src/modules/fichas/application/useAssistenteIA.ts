@@ -3,8 +3,10 @@
 import { useCallback, useState } from 'react';
 
 import { useAuth } from '@/modules/auth/application/useAuth';
-import { adicionarExercicio, criarFicha, type FichaTreino } from '../domain/FichaTreino';
+import { adicionarExercicio, atribuirGrupo, criarFicha, type FichaTreino } from '../domain/FichaTreino';
+import { criarGrupoFicha } from '../domain/GrupoFicha';
 import { salvarFicha } from '../infrastructure/fichaRepository';
+import { salvarGrupoFicha } from '../infrastructure/grupoFichaRepository';
 
 export interface ExercicioGeradoIA {
   nome: string;
@@ -26,19 +28,19 @@ const MENSAGENS_ERRO: Record<string, string> = {
   PERFIL_INCOMPLETO: 'Complete seu perfil de treino para gerar uma ficha com a IA.',
   RATE_LIMIT: 'Aguarde um minuto antes de gerar outra ficha com a IA.',
   IA_INDISPONIVEL: 'A assistente de IA está indisponível agora. Tente novamente em breve.',
-  IA_RESPOSTA_INVALIDA: 'A IA não conseguiu gerar uma ficha válida. Tente novamente.',
+  IA_RESPOSTA_INVALIDA: 'A IA não conseguiu gerar um treino válido. Tente novamente.',
   ERRO_CONSULTA: 'Não foi possível consultar seus dados agora. Tente novamente.',
-  ERRO_INTERNO: 'Erro inesperado ao gerar a ficha. Tente novamente.',
+  ERRO_INTERNO: 'Erro inesperado ao gerar o treino. Tente novamente.',
 };
 
 export interface EstadoAssistenteIA {
   gerando: boolean;
   erro: string | null;
   codigoErro: string | null;
-  fichaGerada: FichaGeradaIA | null;
+  fichasGeradas: FichaGeradaIA[] | null;
   gerar: () => Promise<void>;
   limpar: () => void;
-  usarFichaGerada: () => Promise<FichaTreino>;
+  usarFichasGeradas: () => Promise<FichaTreino[]>;
 }
 
 export function useAssistenteIA(): EstadoAssistenteIA {
@@ -46,23 +48,23 @@ export function useAssistenteIA(): EstadoAssistenteIA {
   const [gerando, setGerando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [codigoErro, setCodigoErro] = useState<string | null>(null);
-  const [fichaGerada, setFichaGerada] = useState<FichaGeradaIA | null>(null);
+  const [fichasGeradas, setFichasGeradas] = useState<FichaGeradaIA[] | null>(null);
 
   const gerar = useCallback(async () => {
     setGerando(true);
     setErro(null);
     setCodigoErro(null);
-    setFichaGerada(null);
+    setFichasGeradas(null);
     try {
       const resposta = await fetch('/api/ia/gerar-treino', { method: 'POST' });
       const corpo = await resposta.json();
       if (!resposta.ok) {
         const codigo = typeof corpo.codigo === 'string' ? corpo.codigo : 'ERRO_INTERNO';
         setCodigoErro(codigo);
-        setErro(MENSAGENS_ERRO[codigo] ?? 'Não foi possível gerar a ficha. Tente novamente.');
+        setErro(MENSAGENS_ERRO[codigo] ?? 'Não foi possível gerar o treino. Tente novamente.');
         return;
       }
-      setFichaGerada(corpo.ficha as FichaGeradaIA);
+      setFichasGeradas(corpo.fichas as FichaGeradaIA[]);
     } catch (causa) {
       console.warn('[ia] Falha ao chamar o endpoint de geração:', causa);
       setCodigoErro('ERRO_INTERNO');
@@ -75,24 +77,42 @@ export function useAssistenteIA(): EstadoAssistenteIA {
   const limpar = useCallback(() => {
     setErro(null);
     setCodigoErro(null);
-    setFichaGerada(null);
+    setFichasGeradas(null);
   }, []);
 
-  const usarFichaGerada = useCallback(async (): Promise<FichaTreino> => {
-    if (fichaGerada === null) {
-      throw new Error('Nenhuma ficha gerada para usar.');
+  const usarFichasGeradas = useCallback(async (): Promise<FichaTreino[]> => {
+    if (fichasGeradas === null || fichasGeradas.length === 0) {
+      throw new Error('Nenhum treino gerado para usar.');
     }
-    let ficha = criarFicha({
-      nome: fichaGerada.nome,
-      usuarioId,
-      descricao: fichaGerada.descricao ?? undefined,
-    });
-    for (const exercicio of fichaGerada.exercicios) {
-      ficha = adicionarExercicio(ficha, exercicio);
-    }
-    await salvarFicha(ficha);
-    return ficha;
-  }, [fichaGerada, usuarioId]);
 
-  return { gerando, erro, codigoErro, fichaGerada, gerar, limpar, usarFichaGerada };
+    let grupoId: string | null = null;
+    if (fichasGeradas.length > 1) {
+      const grupo = criarGrupoFicha({
+        nome: `Treino da semana — ${new Date().toLocaleDateString('pt-BR')}`,
+        usuarioId,
+      });
+      await salvarGrupoFicha(grupo);
+      grupoId = grupo.id;
+    }
+
+    const fichasCriadas: FichaTreino[] = [];
+    for (const fichaGerada of fichasGeradas) {
+      let ficha = criarFicha({
+        nome: fichaGerada.nome,
+        usuarioId,
+        descricao: fichaGerada.descricao ?? undefined,
+      });
+      if (grupoId !== null) {
+        ficha = atribuirGrupo(ficha, grupoId);
+      }
+      for (const exercicio of fichaGerada.exercicios) {
+        ficha = adicionarExercicio(ficha, exercicio);
+      }
+      await salvarFicha(ficha);
+      fichasCriadas.push(ficha);
+    }
+    return fichasCriadas;
+  }, [fichasGeradas, usuarioId]);
+
+  return { gerando, erro, codigoErro, fichasGeradas, gerar, limpar, usarFichasGeradas };
 }

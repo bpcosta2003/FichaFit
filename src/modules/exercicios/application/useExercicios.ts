@@ -14,7 +14,7 @@ import {
   contarCatalogo,
   importarCatalogo,
   listarExercicios,
-  obterWgerIdsExistentes,
+  obterIdsLocaisPorWgerId,
   salvarExercicioCustom,
 } from '../infrastructure/exercicioRepository';
 import { buscarExerciciosWger } from '../infrastructure/wgerApiClient';
@@ -28,7 +28,7 @@ export interface EstadoExercicios {
   importando: boolean;
   buscar: (termo: string) => ExercicioDefinicao[];
   criarCustom: (nome: string, grupoMuscular?: string) => Promise<ExercicioDefinicao>;
-  importarCatalogoWger: () => Promise<void>;
+  importarCatalogoWger: (forcar?: boolean) => Promise<void>;
 }
 
 export function useExercicios(): EstadoExercicios {
@@ -58,31 +58,31 @@ export function useExercicios(): EstadoExercicios {
     [usuarioId]
   );
 
-  const importarCatalogoWger = useCallback(async () => {
+  const importarCatalogoWger = useCallback(async (forcar = false) => {
     setErro(null);
     setImportando(true);
     try {
-      if ((await contarCatalogo()) >= MINIMO_CATALOGO) {
+      if (!forcar && (await contarCatalogo()) >= MINIMO_CATALOGO) {
         return; // catálogo já importado
       }
       const doWger = await buscarExerciciosWger();
-      const existentes = await obterWgerIdsExistentes();
+      const idsLocais = await obterIdsLocaisPorWgerId();
       const agora = new Date().toISOString();
-      const novos: ExercicioDefinicao[] = doWger
-        .filter((item) => !existentes.has(item.wgerId))
-        .map((item) => ({
-          id: uuidv4(),
-          wgerId: item.wgerId,
-          nome: item.nome,
-          grupoMuscular: item.grupoMuscular,
-          descricao: item.descricao,
-          isCustom: false,
-          usuarioId: null,
-          criadoEm: agora,
-          atualizadoEm: agora,
-          deletadoEm: null,
-        }));
-      await importarCatalogo(novos);
+      // Reaproveita o id local de exercícios já importados (mesmo wgerId) para
+      // que a atualização sobrescreva o registro existente em vez de duplicá-lo.
+      const atualizados: ExercicioDefinicao[] = doWger.map((item) => ({
+        id: idsLocais.get(item.wgerId) ?? uuidv4(),
+        wgerId: item.wgerId,
+        nome: item.nome,
+        grupoMuscular: item.grupoMuscular,
+        descricao: item.descricao,
+        isCustom: false,
+        usuarioId: null,
+        criadoEm: agora,
+        atualizadoEm: agora,
+        deletadoEm: null,
+      }));
+      await importarCatalogo(atualizados);
     } catch (causa) {
       console.warn('[exercicios] Falha ao importar catálogo wger:', causa);
       setErro('Não foi possível baixar o catálogo de exercícios. Verifique sua conexão.');

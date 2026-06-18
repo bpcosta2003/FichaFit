@@ -34,46 +34,64 @@ const esquemaFichaGerada = z.object({
   exercicios: z.array(esquemaExercicioGerado).min(1).max(15),
 });
 
-const FERRAMENTA_GERAR_FICHA: Anthropic.Tool = {
-  name: 'gerar_ficha_treino',
-  description: 'Cria uma ficha de treino completa e personalizada para o usuário.',
+const esquemaSemanaGerada = z.object({
+  fichas: z.array(esquemaFichaGerada).min(1).max(7),
+});
+
+const ESQUEMA_FICHA_JSON = {
+  type: 'object',
+  properties: {
+    nome: { type: 'string', description: 'Nome curto da ficha, ex: "Treino A — Peito e Tríceps".' },
+    descricao: {
+      type: ['string', 'null'],
+      description: 'Breve descrição do foco do treino do dia, ou null.',
+    },
+    exercicios: {
+      type: 'array',
+      minItems: 3,
+      maxItems: 15,
+      items: {
+        type: 'object',
+        properties: {
+          nome: { type: 'string' },
+          series: { type: 'integer', minimum: 1, maximum: 10 },
+          repeticoesMin: { type: 'integer', minimum: 1, maximum: 50 },
+          repeticoesMax: { type: 'integer', minimum: 1, maximum: 50 },
+          descansoSegundos: { type: 'integer', minimum: 0, maximum: 300 },
+          cargaReferenciaKg: {
+            type: ['number', 'null'],
+            description: 'Carga sugerida em kg, ou null se não aplicável.',
+          },
+        },
+        required: [
+          'nome',
+          'series',
+          'repeticoesMin',
+          'repeticoesMax',
+          'descansoSegundos',
+          'cargaReferenciaKg',
+        ],
+      },
+    },
+  },
+  required: ['nome', 'descricao', 'exercicios'],
+} as const;
+
+const FERRAMENTA_GERAR_SEMANA: Anthropic.Tool = {
+  name: 'gerar_treino_semanal',
+  description:
+    'Cria um conjunto de fichas de treino — uma por dia de treino da semana — personalizadas para o usuário.',
   input_schema: {
     type: 'object',
     properties: {
-      nome: { type: 'string', description: 'Nome curto da ficha, ex: "Treino A — Peito e Tríceps".' },
-      descricao: {
-        type: ['string', 'null'],
-        description: 'Breve descrição do foco do treino, ou null.',
-      },
-      exercicios: {
+      fichas: {
         type: 'array',
-        minItems: 3,
-        maxItems: 15,
-        items: {
-          type: 'object',
-          properties: {
-            nome: { type: 'string' },
-            series: { type: 'integer', minimum: 1, maximum: 10 },
-            repeticoesMin: { type: 'integer', minimum: 1, maximum: 50 },
-            repeticoesMax: { type: 'integer', minimum: 1, maximum: 50 },
-            descansoSegundos: { type: 'integer', minimum: 0, maximum: 300 },
-            cargaReferenciaKg: {
-              type: ['number', 'null'],
-              description: 'Carga sugerida em kg, ou null se não aplicável.',
-            },
-          },
-          required: [
-            'nome',
-            'series',
-            'repeticoesMin',
-            'repeticoesMax',
-            'descansoSegundos',
-            'cargaReferenciaKg',
-          ],
-        },
+        minItems: 1,
+        maxItems: 7,
+        items: ESQUEMA_FICHA_JSON,
       },
     },
-    required: ['nome', 'descricao', 'exercicios'],
+    required: ['fichas'],
   },
 };
 
@@ -137,22 +155,26 @@ export async function POST(): Promise<NextResponse> {
     }
 
     const rotuloObjetivo = ROTULOS_OBJETIVO[perfil.objetivo] ?? perfil.objetivo;
+    const diasPorSemana = perfil.dias_por_semana;
     const prompt =
-      `Crie uma ficha de treino de musculação personalizada em português brasileiro para ` +
-      `uma pessoa de ${perfil.idade} anos, sexo ${perfil.sexo}, pesando ${perfil.peso_kg} kg, ` +
-      `com objetivo de ${rotuloObjetivo}, que pode treinar ${perfil.dias_por_semana} dia(s) por semana. ` +
-      `Gere uma única ficha (não a semana inteira) adequada para uma sessão de treino, com 4 a 8 exercícios, ` +
-      `nomes de exercícios em português, séries, faixa de repetições, tempo de descanso em segundos e, ` +
-      `quando fizer sentido, uma carga de referência em kg. Use a ferramenta gerar_ficha_treino para responder.`;
+      `Crie um treino de musculação semanal completo, dividido em ${diasPorSemana} ficha(s) — ` +
+      `uma para cada dia de treino —, personalizado em português brasileiro para uma pessoa de ` +
+      `${perfil.idade} anos, sexo ${perfil.sexo}, pesando ${perfil.peso_kg} kg, com objetivo de ` +
+      `${rotuloObjetivo}. Cada ficha deve ter um nome que indique o dia/foco (ex: "Treino A — Peito e ` +
+      `Tríceps", "Treino B — Costas e Bíceps") e um foco muscular diferente das demais, para favorecer ` +
+      `a recuperação entre os grupos musculares ao longo da semana. Cada ficha deve ter de 4 a 8 ` +
+      `exercícios com nomes em português, séries, faixa de repetições, tempo de descanso em segundos e, ` +
+      `quando fizer sentido, uma carga de referência em kg. Gere exatamente ${diasPorSemana} ficha(s). ` +
+      `Use a ferramenta gerar_treino_semanal para responder.`;
 
     const anthropic = new Anthropic({ apiKey: chaveApi });
     let mensagem: Anthropic.Message;
     try {
       mensagem = await anthropic.messages.create({
         model: MODELO_CLAUDE,
-        max_tokens: 2048,
-        tools: [FERRAMENTA_GERAR_FICHA],
-        tool_choice: { type: 'tool', name: 'gerar_ficha_treino' },
+        max_tokens: 4096,
+        tools: [FERRAMENTA_GERAR_SEMANA],
+        tool_choice: { type: 'tool', name: 'gerar_treino_semanal' },
         messages: [{ role: 'user', content: prompt }],
       });
     } catch (causa) {
@@ -168,13 +190,13 @@ export async function POST(): Promise<NextResponse> {
       (bloco): bloco is Anthropic.ToolUseBlock => bloco.type === 'tool_use'
     );
     if (blocoFerramenta === undefined) {
-      return respostaErro('A IA não retornou uma ficha válida.', 'IA_RESPOSTA_INVALIDA', 502);
+      return respostaErro('A IA não retornou um treino válido.', 'IA_RESPOSTA_INVALIDA', 502);
     }
 
-    const resultado = esquemaFichaGerada.safeParse(blocoFerramenta.input);
+    const resultado = esquemaSemanaGerada.safeParse(blocoFerramenta.input);
     if (!resultado.success) {
       console.warn('[ia] Resposta da IA fora do schema esperado:', resultado.error.message);
-      return respostaErro('A IA não retornou uma ficha válida.', 'IA_RESPOSTA_INVALIDA', 502);
+      return respostaErro('A IA não retornou um treino válido.', 'IA_RESPOSTA_INVALIDA', 502);
     }
 
     const { error: erroRegistro } = await supabase
@@ -184,7 +206,7 @@ export async function POST(): Promise<NextResponse> {
       console.warn('[ia] Falha ao registrar geração para rate limit:', erroRegistro.message);
     }
 
-    return NextResponse.json({ ficha: resultado.data });
+    return NextResponse.json({ fichas: resultado.data.fichas });
   } catch (causa) {
     console.warn('[ia] Erro inesperado ao gerar ficha:', causa);
     return respostaErro('Erro inesperado ao gerar a ficha.', 'ERRO_INTERNO', 500);

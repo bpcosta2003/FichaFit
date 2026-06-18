@@ -12,6 +12,11 @@ export interface Database {
           id: string;
           nome: string | null;
           avatar_id: string;
+          objetivo: string | null;
+          idade: number | null;
+          peso_kg: number | null;
+          sexo: string | null;
+          dias_por_semana: number | null;
           criado_em: string;
           atualizado_em: string;
         };
@@ -19,6 +24,11 @@ export interface Database {
           id: string;
           nome?: string | null;
           avatar_id?: string;
+          objetivo?: string | null;
+          idade?: number | null;
+          peso_kg?: number | null;
+          sexo?: string | null;
+          dias_por_semana?: number | null;
           criado_em?: string;
           atualizado_em?: string;
         };
@@ -26,8 +36,31 @@ export interface Database {
           id?: string;
           nome?: string | null;
           avatar_id?: string;
+          objetivo?: string | null;
+          idade?: number | null;
+          peso_kg?: number | null;
+          sexo?: string | null;
+          dias_por_semana?: number | null;
           criado_em?: string;
           atualizado_em?: string;
+        };
+        Relationships: [];
+      };
+      ia_geracoes: {
+        Row: {
+          id: string;
+          usuario_id: string;
+          criado_em: string;
+        };
+        Insert: {
+          id?: string;
+          usuario_id: string;
+          criado_em?: string;
+        };
+        Update: {
+          id?: string;
+          usuario_id?: string;
+          criado_em?: string;
         };
         Relationships: [];
       };

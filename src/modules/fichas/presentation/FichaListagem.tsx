@@ -6,6 +6,7 @@ import { useMemo, useState, type FormEvent } from 'react';
 
 import { useFichas, useGruposFicha } from '@/modules/fichas/application/useFichas';
 import { exerciciosOrdenados, type FichaTreino } from '@/modules/fichas/domain/FichaTreino';
+import { ModalAssistenteIA } from '@/modules/fichas/presentation/ModalAssistenteIA';
 import { BotaoGrande } from '@/shared/components/BotaoGrande';
 import { ModalConfirmacao } from '@/shared/components/ModalConfirmacao';
 import { formatarDataRelativa } from '@/shared/utils/formatacao';
@@ -115,6 +116,7 @@ export function FichaListagem() {
   const [nomeGrupo, setNomeGrupo] = useState('');
   const [erroGrupo, setErroGrupo] = useState<string | null>(null);
   const [grupoExcluindo, setGrupoExcluindo] = useState<{ id: string; nome: string } | null>(null);
+  const [assistenteAberto, setAssistenteAberto] = useState(false);
 
   const aoCriar = async (evento: FormEvent): Promise<void> => {
     evento.preventDefault();
@@ -175,6 +177,24 @@ export function FichaListagem() {
           Fichas
         </h1>
       </header>
+
+      <button
+        type="button"
+        onClick={() => setAssistenteAberto(true)}
+        className="flex min-h-toque items-center gap-3 rounded-2xl border border-fogo/40 bg-superficie p-4 text-left active:scale-[0.99]"
+      >
+        <span className="gradiente-fogo flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-2xl">
+          ✨
+        </span>
+        <span className="flex flex-col">
+          <span className="font-titulo text-sm font-bold uppercase tracking-tight text-texto">
+            Gerar treino com IA
+          </span>
+          <span className="text-xs text-texto-suave">
+            Crie uma ficha personalizada com base no seu perfil
+          </span>
+        </span>
+      </button>
 
       {fichas.length === 0 && !criando && (
         <div className="flex flex-col items-center gap-4 rounded-2xl border border-borda bg-superficie px-6 py-10 text-center">
@@ -320,6 +340,8 @@ export function FichaListagem() {
         }}
         aoCancelar={() => setGrupoExcluindo(null)}
       />
+
+      <ModalAssistenteIA aberto={assistenteAberto} aoFechar={() => setAssistenteAberto(false)} />
     </div>
   );
 }

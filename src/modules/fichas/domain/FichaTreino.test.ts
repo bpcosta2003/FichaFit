@@ -3,11 +3,11 @@ import { describe, expect, it } from 'vitest';
 import {
   adicionarExercicio,
   criarFicha,
+  editarFicha,
   exerciciosOrdenados,
   marcarFichaDeletada,
   moverExercicio,
   removerExercicio,
-  renomearFicha,
   SERIES_PADRAO,
   TEMPO_DESCANSO_PADRAO,
 } from './FichaTreino';
@@ -77,12 +77,22 @@ describe('removerExercicio e moverExercicio', () => {
   });
 });
 
-describe('renomearFicha e marcarFichaDeletada', () => {
-  it('renomeia e atualiza o carimbo de atualização', () => {
+describe('editarFicha e marcarFichaDeletada', () => {
+  it('edita nome e descrição sem mutar a ficha original', () => {
     const ficha = criarFicha({ nome: 'Treino A', usuarioId: 'usuario-teste' });
-    const renomeada = renomearFicha(ficha, 'Treino B');
-    expect(renomeada.nome).toBe('Treino B');
+    const editada = editarFicha(ficha, { nome: 'Treino B', descricao: 'Foco em peito' });
+    expect(editada.nome).toBe('Treino B');
+    expect(editada.descricao).toBe('Foco em peito');
     expect(ficha.nome).toBe('Treino A');
+  });
+
+  it('mantém a descrição existente quando não informada', () => {
+    const ficha = editarFicha(
+      criarFicha({ nome: 'Treino A', usuarioId: 'usuario-teste' }),
+      { nome: 'Treino A', descricao: 'Original' }
+    );
+    const editada = editarFicha(ficha, { nome: 'Treino C' });
+    expect(editada.descricao).toBe('Original');
   });
 
   it('soft delete preenche deletadoEm sem remover dados', () => {

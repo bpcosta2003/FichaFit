@@ -10,6 +10,10 @@ import {
   pushFichaParaSupabase,
 } from '@/modules/fichas/infrastructure/fichaSupabase';
 import {
+  pullGruposFichaDoSupabase,
+  pushGrupoFichaParaSupabase,
+} from '@/modules/fichas/infrastructure/grupoFichaSupabase';
+import {
   pullSessoesDoSupabase,
   pushSessaoParaSupabase,
 } from '@/modules/sessao/infrastructure/sessaoSupabase';
@@ -37,6 +41,12 @@ const esquemaLinhaExercicioDefinicao = z.object({
 
 // Registros criados antes do login pertencem ao usuário autenticado.
 export async function adotarRegistrosLocais(usuarioId: string): Promise<void> {
+  const gruposLocais = await db.gruposFicha.where('usuarioId').equals(USUARIO_LOCAL).toArray();
+  for (const grupo of gruposLocais) {
+    await db.gruposFicha.put({ ...grupo, usuarioId });
+    await enfileirar('grupo_ficha', grupo.id);
+  }
+
   const fichasLocais = await db.fichasTreino.where('usuarioId').equals(USUARIO_LOCAL).toArray();
   for (const ficha of fichasLocais) {
     await db.fichasTreino.put({ ...ficha, usuarioId });
@@ -100,6 +110,11 @@ export async function pushParaServidor(usuarioId: string): Promise<void> {
         if (sessao !== undefined && sessao.usuarioId === usuarioId) {
           await pushSessaoParaSupabase(supabase, sessao);
         }
+      } else if (entrada.entidade === 'grupo_ficha') {
+        const grupo = await db.gruposFicha.get(entrada.registroId);
+        if (grupo !== undefined && grupo.usuarioId === usuarioId) {
+          await pushGrupoFichaParaSupabase(supabase, grupo);
+        }
       } else {
         const exercicio = await db.exercicioDefinicoes.get(entrada.registroId);
         if (exercicio !== undefined && exercicio.usuarioId === usuarioId) {
@@ -123,6 +138,14 @@ export async function pullDoServidor(usuarioId: string): Promise<void> {
   }
 
   // Last-write-wins: só sobrescreve o registro local se o remoto for mais novo.
+  const gruposRemotos = await pullGruposFichaDoSupabase(supabase, usuarioId);
+  for (const remoto of gruposRemotos) {
+    const local = await db.gruposFicha.get(remoto.id);
+    if (local === undefined || local.atualizadoEm <= remoto.atualizadoEm) {
+      await db.gruposFicha.put(remoto);
+    }
+  }
+
   const fichasRemotas = await pullFichasDoSupabase(supabase, usuarioId);
   for (const remota of fichasRemotas) {
     const local = await db.fichasTreino.get(remota.id);

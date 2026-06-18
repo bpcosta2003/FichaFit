@@ -4,6 +4,7 @@ import type { User } from '@supabase/supabase-js';
 import { useCallback, useEffect, useState } from 'react';
 
 import { USUARIO_LOCAL } from '@/shared/db/db';
+import { sincronizar } from '@/shared/sync/syncEngine';
 import {
   aoMudarSessao,
   enviarMagicLink,
@@ -32,6 +33,11 @@ export function useAuth(): EstadoAuth {
         if (montado) {
           setUsuario(atual);
         }
+        if (atual !== null) {
+          sincronizar(atual.id).catch((erro) =>
+            console.warn('[auth] Falha ao sincronizar no carregamento inicial:', erro)
+          );
+        }
       })
       .catch(() => undefined)
       .finally(() => {
@@ -42,6 +48,11 @@ export function useAuth(): EstadoAuth {
     const cancelar = aoMudarSessao((novoUsuario) => {
       if (montado) {
         setUsuario(novoUsuario);
+      }
+      if (novoUsuario !== null) {
+        sincronizar(novoUsuario.id).catch((erro) =>
+          console.warn('[auth] Falha ao sincronizar após mudança de sessão:', erro)
+        );
       }
     });
     return () => {

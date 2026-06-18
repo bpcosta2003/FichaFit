@@ -4,9 +4,10 @@ import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
 
 import { useFicha } from '@/modules/fichas/application/useFichas';
-import { exerciciosOrdenados } from '@/modules/fichas/domain/FichaTreino';
+import { exerciciosOrdenados, type ExercicioFicha } from '@/modules/fichas/domain/FichaTreino';
 import { BotaoGrande } from '@/shared/components/BotaoGrande';
 import { ModalConfirmacao } from '@/shared/components/ModalConfirmacao';
+import { SeletorExercicio } from '@/shared/components/SeletorExercicio';
 import { formatarPesoKg } from '@/shared/utils/formatacao';
 
 interface PropsFichaDetalhe {
@@ -14,6 +15,7 @@ interface PropsFichaDetalhe {
 }
 
 interface FormularioExercicio {
+  exercicioDefinicaoId: string | null;
   nome: string;
   series: number;
   repeticoesMin: number;
@@ -23,6 +25,7 @@ interface FormularioExercicio {
 }
 
 const FORMULARIO_VAZIO: FormularioExercicio = {
+  exercicioDefinicaoId: null,
   nome: '',
   series: 3,
   repeticoesMin: 8,
@@ -34,14 +37,40 @@ const FORMULARIO_VAZIO: FormularioExercicio = {
 const CLASSE_INPUT =
   'min-h-toque rounded-xl border border-borda bg-superficie-2 px-4 text-base text-texto outline-none placeholder:text-texto-suave focus:border-fogo';
 
+function formularioParaExercicio(exercicio: ExercicioFicha): FormularioExercicio {
+  return {
+    exercicioDefinicaoId: exercicio.exercicioDefinicaoId,
+    nome: exercicio.nome,
+    series: exercicio.series,
+    repeticoesMin: exercicio.repeticoesMin,
+    repeticoesMax: exercicio.repeticoesMax,
+    cargaReferenciaKg:
+      exercicio.cargaReferenciaKg === null ? '' : String(exercicio.cargaReferenciaKg),
+    descansoSegundos: exercicio.descansoSegundos,
+  };
+}
+
 export function FichaDetalhe({ fichaId }: PropsFichaDetalhe) {
   const router = useRouter();
-  const { ficha, carregando, incluirExercicio, excluirExercicio, mover, deletarFicha } =
-    useFicha(fichaId);
+  const {
+    ficha,
+    carregando,
+    editar,
+    incluirExercicio,
+    editarExercicio,
+    excluirExercicio,
+    mover,
+    deletarFicha,
+  } = useFicha(fichaId);
   const [adicionando, setAdicionando] = useState(false);
+  const [exercicioEditandoId, setExercicioEditandoId] = useState<string | null>(null);
   const [formulario, setFormulario] = useState<FormularioExercicio>(FORMULARIO_VAZIO);
   const [erro, setErro] = useState<string | null>(null);
   const [confirmandoExclusao, setConfirmandoExclusao] = useState(false);
+  const [editandoFicha, setEditandoFicha] = useState(false);
+  const [nomeFicha, setNomeFicha] = useState('');
+  const [descricaoFicha, setDescricaoFicha] = useState('');
+  const [erroFicha, setErroFicha] = useState<string | null>(null);
 
   if (carregando) {
     return <p className="px-5 py-8 text-center text-texto-suave">Carregando ficha…</p>;
@@ -60,24 +89,63 @@ export function FichaDetalhe({ fichaId }: PropsFichaDetalhe) {
 
   const exercicios = exerciciosOrdenados(ficha);
 
+  const abrirEdicaoFicha = (): void => {
+    setNomeFicha(ficha.nome);
+    setDescricaoFicha(ficha.descricao ?? '');
+    setErroFicha(null);
+    setEditandoFicha(true);
+  };
+
+  const aoSalvarFicha = async (evento: FormEvent): Promise<void> => {
+    evento.preventDefault();
+    setErroFicha(null);
+    try {
+      await editar({ nome: nomeFicha, descricao: descricaoFicha });
+      setEditandoFicha(false);
+    } catch (causa) {
+      setErroFicha(causa instanceof Error ? causa.message : 'Não foi possível editar a ficha.');
+    }
+  };
+
+  const abrirEdicaoExercicio = (exercicio: ExercicioFicha): void => {
+    setFormulario(formularioParaExercicio(exercicio));
+    setExercicioEditandoId(exercicio.id);
+    setAdicionando(true);
+    setErro(null);
+  };
+
   const aoAdicionar = async (evento: FormEvent): Promise<void> => {
     evento.preventDefault();
     setErro(null);
     try {
       const carga = formulario.cargaReferenciaKg.trim();
-      await incluirExercicio({
+      const dados = {
+        exercicioDefinicaoId: formulario.exercicioDefinicaoId,
         nome: formulario.nome,
         series: formulario.series,
         repeticoesMin: formulario.repeticoesMin,
         repeticoesMax: formulario.repeticoesMax,
         cargaReferenciaKg: carga === '' ? null : Number(carga.replace(',', '.')),
         descansoSegundos: formulario.descansoSegundos,
-      });
+      };
+      if (exercicioEditandoId !== null) {
+        await editarExercicio(exercicioEditandoId, dados);
+      } else {
+        await incluirExercicio(dados);
+      }
       setFormulario(FORMULARIO_VAZIO);
+      setExercicioEditandoId(null);
       setAdicionando(false);
     } catch (causa) {
-      setErro(causa instanceof Error ? causa.message : 'Não foi possível adicionar o exercício.');
+      setErro(causa instanceof Error ? causa.message : 'Não foi possível salvar o exercício.');
     }
+  };
+
+  const aoCancelarExercicio = (): void => {
+    setAdicionando(false);
+    setExercicioEditandoId(null);
+    setFormulario(FORMULARIO_VAZIO);
+    setErro(null);
   };
 
   const aoDeletar = async (): Promise<void> => {
@@ -98,10 +166,51 @@ export function FichaDetalhe({ fichaId }: PropsFichaDetalhe) {
             <path d="M15 6l-6 6 6 6" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
-        <h1 className="font-titulo text-3xl font-bold uppercase leading-none tracking-tight text-texto">
+        <h1 className="flex-1 font-titulo text-3xl font-bold uppercase leading-none tracking-tight text-texto">
           {ficha.nome}
         </h1>
+        <button
+          type="button"
+          aria-label="Editar ficha"
+          onClick={abrirEdicaoFicha}
+          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-texto-suave active:bg-superficie"
+        >
+          <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5" aria-hidden="true">
+            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+          </svg>
+        </button>
       </header>
+
+      {editandoFicha && (
+        <form
+          onSubmit={(evento) => void aoSalvarFicha(evento)}
+          className="flex flex-col gap-3 rounded-2xl border border-borda bg-superficie p-4"
+        >
+          <input
+            autoFocus
+            required
+            placeholder="Nome da ficha"
+            value={nomeFicha}
+            onChange={(evento) => setNomeFicha(evento.target.value)}
+            className={CLASSE_INPUT}
+          />
+          <input
+            placeholder="Descrição (opcional)"
+            value={descricaoFicha}
+            onChange={(evento) => setDescricaoFicha(evento.target.value)}
+            className={CLASSE_INPUT}
+          />
+          {erroFicha !== null && (
+            <p role="alert" className="text-sm font-medium text-erro">
+              {erroFicha}
+            </p>
+          )}
+          <BotaoGrande type="submit">Salvar ficha</BotaoGrande>
+          <BotaoGrande type="button" variante="secundaria" onClick={() => setEditandoFicha(false)}>
+            Cancelar
+          </BotaoGrande>
+        </form>
+      )}
 
       {exercicios.length === 0 && !adicionando && (
         <div className="flex flex-col items-center gap-3 rounded-2xl border border-borda bg-superficie px-6 py-8 text-center">
@@ -117,7 +226,12 @@ export function FichaDetalhe({ fichaId }: PropsFichaDetalhe) {
             key={exercicio.id}
             className="flex items-center gap-3 rounded-2xl border border-borda bg-superficie p-4"
           >
-            <div className="flex flex-1 flex-col gap-0.5">
+            <button
+              type="button"
+              aria-label={`Editar ${exercicio.nome}`}
+              onClick={() => abrirEdicaoExercicio(exercicio)}
+              className="flex flex-1 flex-col gap-0.5 text-left"
+            >
               <span className="font-titulo text-lg font-semibold uppercase tracking-tight text-texto">
                 {exercicio.nome}
               </span>
@@ -127,7 +241,7 @@ export function FichaDetalhe({ fichaId }: PropsFichaDetalhe) {
                   ` · ${formatarPesoKg(exercicio.cargaReferenciaKg)}`}{' '}
                 · {exercicio.descansoSegundos}s descanso
               </span>
-            </div>
+            </button>
             <div className="flex flex-col">
               <button
                 type="button"
@@ -165,13 +279,11 @@ export function FichaDetalhe({ fichaId }: PropsFichaDetalhe) {
           onSubmit={(evento) => void aoAdicionar(evento)}
           className="flex flex-col gap-3 rounded-2xl border border-borda bg-superficie p-4"
         >
-          <input
-            autoFocus
-            required
-            placeholder="Nome do exercício (ex: Supino Reto)"
-            value={formulario.nome}
-            onChange={(evento) => setFormulario({ ...formulario, nome: evento.target.value })}
-            className={CLASSE_INPUT}
+          <SeletorExercicio
+            valor={{ exercicioDefinicaoId: formulario.exercicioDefinicaoId, nome: formulario.nome }}
+            aoSelecionar={({ exercicioDefinicaoId, nome }) =>
+              setFormulario({ ...formulario, exercicioDefinicaoId, nome })
+            }
           />
           <div className="grid grid-cols-2 gap-3">
             <label className="flex flex-col gap-1 text-sm font-medium text-texto-suave">
@@ -246,8 +358,10 @@ export function FichaDetalhe({ fichaId }: PropsFichaDetalhe) {
               {erro}
             </p>
           )}
-          <BotaoGrande type="submit">Adicionar exercício</BotaoGrande>
-          <BotaoGrande type="button" variante="secundaria" onClick={() => setAdicionando(false)}>
+          <BotaoGrande type="submit">
+            {exercicioEditandoId !== null ? 'Salvar exercício' : 'Adicionar exercício'}
+          </BotaoGrande>
+          <BotaoGrande type="button" variante="secundaria" onClick={aoCancelarExercicio}>
             Cancelar
           </BotaoGrande>
         </form>

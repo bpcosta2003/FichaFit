@@ -76,6 +76,7 @@ export interface Database {
           usuario_id: string;
           nome: string;
           descricao: string | null;
+          grupo_id: string | null;
           criado_em: string;
           atualizado_em: string;
           deletado_em: string | null;
@@ -85,6 +86,7 @@ export interface Database {
           usuario_id: string;
           nome: string;
           descricao?: string | null;
+          grupo_id?: string | null;
           criado_em?: string;
           atualizado_em?: string;
           deletado_em?: string | null;
@@ -94,6 +96,34 @@ export interface Database {
           usuario_id?: string;
           nome?: string;
           descricao?: string | null;
+          grupo_id?: string | null;
+          criado_em?: string;
+          atualizado_em?: string;
+          deletado_em?: string | null;
+        };
+        Relationships: [];
+      };
+      grupos_ficha: {
+        Row: {
+          id: string;
+          usuario_id: string;
+          nome: string;
+          criado_em: string;
+          atualizado_em: string;
+          deletado_em: string | null;
+        };
+        Insert: {
+          id: string;
+          usuario_id: string;
+          nome: string;
+          criado_em?: string;
+          atualizado_em?: string;
+          deletado_em?: string | null;
+        };
+        Update: {
+          id?: string;
+          usuario_id?: string;
+          nome?: string;
           criado_em?: string;
           atualizado_em?: string;
           deletado_em?: string | null;

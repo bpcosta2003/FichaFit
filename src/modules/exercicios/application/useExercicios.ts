@@ -27,7 +27,7 @@ export interface EstadoExercicios {
   erro: string | null;
   importando: boolean;
   buscar: (termo: string) => ExercicioDefinicao[];
-  criarCustom: (nome: string, grupoMuscular?: string) => Promise<void>;
+  criarCustom: (nome: string, grupoMuscular?: string) => Promise<ExercicioDefinicao>;
   importarCatalogoWger: () => Promise<void>;
 }
 
@@ -47,7 +47,9 @@ export function useExercicios(): EstadoExercicios {
     async (nome: string, grupoMuscular?: string) => {
       setErro(null);
       try {
-        await salvarExercicioCustom(criarExercicioCustom({ nome, usuarioId, grupoMuscular }));
+        const exercicio = criarExercicioCustom({ nome, usuarioId, grupoMuscular });
+        await salvarExercicioCustom(exercicio);
+        return exercicio;
       } catch (causa) {
         setErro(causa instanceof Error ? causa.message : 'Não foi possível criar o exercício.');
         throw causa;

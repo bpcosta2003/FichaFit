@@ -47,9 +47,17 @@ export async function sair(): Promise<void> {
   await supabase.auth.signOut();
 }
 
+export type ObjetivoTreino = 'hipertrofia' | 'perda_peso' | 'manutencao' | 'resistencia';
+export type SexoUsuario = 'masculino' | 'feminino' | 'outro';
+
 export interface PerfilUsuario {
   nome: string | null;
   avatarId: string;
+  objetivo: ObjetivoTreino | null;
+  idade: number | null;
+  pesoKg: number | null;
+  sexo: SexoUsuario | null;
+  diasPorSemana: number | null;
 }
 
 export async function obterPerfil(usuarioId: string): Promise<PerfilUsuario | null> {
@@ -59,18 +67,34 @@ export async function obterPerfil(usuarioId: string): Promise<PerfilUsuario | nu
   }
   const { data, error } = await supabase
     .from('perfis_usuario')
-    .select('nome, avatar_id')
+    .select('nome, avatar_id, objetivo, idade, peso_kg, sexo, dias_por_semana')
     .eq('id', usuarioId)
     .maybeSingle();
   if (error || data === null) {
     return null;
   }
-  return { nome: data.nome, avatarId: data.avatar_id };
+  return {
+    nome: data.nome,
+    avatarId: data.avatar_id,
+    objetivo: (data.objetivo as ObjetivoTreino | null) ?? null,
+    idade: data.idade,
+    pesoKg: data.peso_kg,
+    sexo: (data.sexo as SexoUsuario | null) ?? null,
+    diasPorSemana: data.dias_por_semana,
+  };
 }
 
 export async function atualizarPerfil(
   usuarioId: string,
-  mudancas: Partial<{ nome: string; avatarId: string }>
+  mudancas: Partial<{
+    nome: string;
+    avatarId: string;
+    objetivo: ObjetivoTreino;
+    idade: number;
+    pesoKg: number;
+    sexo: SexoUsuario;
+    diasPorSemana: number;
+  }>
 ): Promise<void> {
   const supabase = obterSupabaseBrowser();
   if (supabase === null) {
@@ -82,6 +106,13 @@ export async function atualizarPerfil(
       id: usuarioId,
       ...(mudancas.nome !== undefined ? { nome: mudancas.nome } : {}),
       ...(mudancas.avatarId !== undefined ? { avatar_id: mudancas.avatarId } : {}),
+      ...(mudancas.objetivo !== undefined ? { objetivo: mudancas.objetivo } : {}),
+      ...(mudancas.idade !== undefined ? { idade: mudancas.idade } : {}),
+      ...(mudancas.pesoKg !== undefined ? { peso_kg: mudancas.pesoKg } : {}),
+      ...(mudancas.sexo !== undefined ? { sexo: mudancas.sexo } : {}),
+      ...(mudancas.diasPorSemana !== undefined
+        ? { dias_por_semana: mudancas.diasPorSemana }
+        : {}),
       atualizado_em: new Date().toISOString(),
     });
   if (error) {

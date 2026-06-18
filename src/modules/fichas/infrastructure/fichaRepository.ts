@@ -24,6 +24,7 @@ const esquemaFicha = z.object({
   usuarioId: z.string(),
   nome: z.string(),
   descricao: z.string().nullable(),
+  grupoId: z.string().nullable().default(null),
   exercicios: z.array(esquemaExercicioFicha),
   criadoEm: z.string(),
   atualizadoEm: z.string(),

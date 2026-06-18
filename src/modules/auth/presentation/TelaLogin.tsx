@@ -5,6 +5,7 @@ import { useState, type FormEvent } from 'react';
 
 import { useAuth } from '@/modules/auth/application/useAuth';
 import { BotaoGrande } from '@/shared/components/BotaoGrande';
+import { Logo } from '@/shared/components/Logo';
 
 type Estado = 'inicial' | 'enviando' | 'enviado';
 
@@ -32,6 +33,9 @@ export function TelaLogin() {
   return (
     <div className="mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-8 bg-fundo px-6">
       <div className="text-center">
+        <div className="mb-4 flex justify-center">
+          <Logo tamanho="lg" />
+        </div>
         <h1 className="font-titulo text-6xl font-bold uppercase tracking-tight text-fogo">
           FichaFit
         </h1>

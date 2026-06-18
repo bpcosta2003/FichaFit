@@ -9,4 +9,12 @@ export function aplicarMigrations(db: Dexie): void {
     exercicioDefinicoes: 'id, wgerId, usuarioId, nome',
     filaSync: '++id, registroId, entidade, criadoEm',
   });
+
+  db.version(2).stores({
+    fichasTreino: 'id, usuarioId, atualizadoEm, grupoId',
+    sessoesTreino: 'id, clientId, usuarioId, fichaId, status, iniciadaEm',
+    exercicioDefinicoes: 'id, wgerId, usuarioId, nome',
+    filaSync: '++id, registroId, entidade, criadoEm',
+    gruposFicha: 'id, usuarioId, atualizadoEm',
+  });
 }

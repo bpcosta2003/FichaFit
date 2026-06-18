@@ -7,6 +7,10 @@ export const metadata: Metadata = {
   title: 'FichaFit',
   description: 'Suas fichas de treino, na palma da mão — mesmo sem internet.',
   manifest: '/manifest.json',
+  icons: {
+    icon: '/favicon.ico',
+    apple: '/icons/icon-192.png',
+  },
   appleWebApp: {
     capable: true,
     title: 'FichaFit',

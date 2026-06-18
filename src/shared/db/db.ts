@@ -2,6 +2,7 @@ import Dexie, { type Table } from 'dexie';
 
 import type { ExercicioDefinicao } from '@/modules/exercicios/domain/Exercicio';
 import type { FichaTreino } from '@/modules/fichas/domain/FichaTreino';
+import type { GrupoFicha } from '@/modules/fichas/domain/GrupoFicha';
 import type { SessaoTreino } from '@/modules/sessao/domain/SessaoTreino';
 import { aplicarMigrations } from './migrations';
 
@@ -9,7 +10,7 @@ import { aplicarMigrations } from './migrations';
 // são adotados pelo usuário real (ver syncEngine.adotarRegistrosLocais).
 export const USUARIO_LOCAL = 'local';
 
-export type EntidadeSync = 'ficha' | 'sessao' | 'exercicio';
+export type EntidadeSync = 'ficha' | 'sessao' | 'exercicio' | 'grupo_ficha';
 
 export interface EntradaFilaSync {
   id?: number;
@@ -24,6 +25,7 @@ export class FichaFitDB extends Dexie {
   sessoesTreino!: Table<SessaoTreino, string>;
   exercicioDefinicoes!: Table<ExercicioDefinicao, string>;
   filaSync!: Table<EntradaFilaSync, number>;
+  gruposFicha!: Table<GrupoFicha, string>;
 
   constructor() {
     super('fichafit');

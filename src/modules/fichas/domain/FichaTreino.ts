@@ -25,6 +25,7 @@ export interface FichaTreino {
   usuarioId: string;
   nome: string;
   descricao: string | null;
+  grupoId: string | null;
   exercicios: ExercicioFicha[];
   criadoEm: string;
   atualizadoEm: string;
@@ -35,6 +36,12 @@ export interface NovaFicha {
   nome: string;
   usuarioId: string;
   descricao?: string;
+  grupoId?: string | null;
+}
+
+export interface EdicaoFicha {
+  nome: string;
+  descricao?: string | null;
 }
 
 export interface NovoExercicioFicha {
@@ -63,6 +70,7 @@ export function criarFicha(dados: NovaFicha): FichaTreino {
     usuarioId: dados.usuarioId,
     nome,
     descricao: dados.descricao?.trim() || null,
+    grupoId: dados.grupoId ?? null,
     exercicios: [],
     criadoEm: agora,
     atualizadoEm: agora,
@@ -70,12 +78,18 @@ export function criarFicha(dados: NovaFicha): FichaTreino {
   };
 }
 
-export function renomearFicha(ficha: FichaTreino, nome: string): FichaTreino {
-  const nomeLimpo = nome.trim();
+export function editarFicha(ficha: FichaTreino, dados: EdicaoFicha): FichaTreino {
+  const nomeLimpo = dados.nome.trim();
   if (nomeLimpo.length === 0) {
     throw new Error('O nome da ficha é obrigatório.');
   }
-  return tocar(ficha, { nome: nomeLimpo });
+  const descricao =
+    dados.descricao === undefined ? ficha.descricao : dados.descricao?.trim() || null;
+  return tocar(ficha, { nome: nomeLimpo, descricao });
+}
+
+export function atribuirGrupo(ficha: FichaTreino, grupoId: string | null): FichaTreino {
+  return tocar(ficha, { grupoId });
 }
 
 export function adicionarExercicio(

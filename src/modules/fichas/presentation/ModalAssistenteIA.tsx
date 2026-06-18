@@ -14,7 +14,7 @@ interface PropsModalAssistenteIA {
 
 export function ModalAssistenteIA({ aberto, aoFechar }: PropsModalAssistenteIA) {
   const router = useRouter();
-  const { gerando, erro, codigoErro, fichaGerada, gerar, limpar, usarFichaGerada } =
+  const { gerando, erro, codigoErro, fichasGeradas, justificativa, gerar, limpar, usarFichasGeradas } =
     useAssistenteIA();
 
   if (!aberto) {
@@ -26,11 +26,16 @@ export function ModalAssistenteIA({ aberto, aoFechar }: PropsModalAssistenteIA) 
     aoFechar();
   };
 
-  const aoUsarFicha = async (): Promise<void> => {
-    const ficha = await usarFichaGerada();
+  const aoUsarFichas = async (): Promise<void> => {
+    const fichas = await usarFichasGeradas();
     limpar();
     aoFechar();
-    router.push(`/treinos/${ficha.id}`);
+    const [unica] = fichas;
+    if (fichas.length === 1 && unica !== undefined) {
+      router.push(`/treinos/${unica.id}`);
+    } else {
+      router.push('/treinos');
+    }
   };
 
   return (
@@ -61,34 +66,70 @@ export function ModalAssistenteIA({ aberto, aoFechar }: PropsModalAssistenteIA) 
               Cancelar
             </BotaoGrande>
           </div>
-        ) : fichaGerada !== null ? (
+        ) : fichasGeradas !== null ? (
           <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-1">
-              <span className="font-titulo text-xl font-bold uppercase tracking-tight text-texto">
-                {fichaGerada.nome}
-              </span>
-              {fichaGerada.descricao !== null && (
-                <span className="text-sm text-texto-suave">{fichaGerada.descricao}</span>
-              )}
-            </div>
-            <ul className="flex flex-col gap-2">
-              {fichaGerada.exercicios.map((exercicio, indice) => (
-                <li
-                  key={`${exercicio.nome}-${indice}`}
-                  className="rounded-xl border border-borda bg-superficie-2 p-3"
-                >
-                  <span className="font-semibold text-texto">{exercicio.nome}</span>
-                  <p className="text-sm text-texto-suave">
-                    {exercicio.series} séries · {exercicio.repeticoesMin}–{exercicio.repeticoesMax}{' '}
-                    reps
-                    {exercicio.cargaReferenciaKg !== null &&
-                      ` · ${formatarPesoKg(exercicio.cargaReferenciaKg)}`}{' '}
-                    · {exercicio.descansoSegundos}s descanso
-                  </p>
-                </li>
-              ))}
-            </ul>
-            <BotaoGrande onClick={() => void aoUsarFicha()}>Usar esta ficha</BotaoGrande>
+            <p className="text-sm text-texto-suave">
+              {fichasGeradas.length === 1
+                ? 'Sua ficha personalizada:'
+                : `Seu treino da semana, em ${fichasGeradas.length} fichas:`}
+            </p>
+            {fichasGeradas.map((ficha, indiceFicha) => (
+              <div
+                key={`${ficha.nome}-${indiceFicha}`}
+                className="flex flex-col gap-2 rounded-xl border border-borda bg-superficie-2 p-3"
+              >
+                <div className="flex flex-col gap-1">
+                  <span className="font-titulo text-lg font-bold uppercase tracking-tight text-texto">
+                    {ficha.nome}
+                  </span>
+                  {ficha.descricao !== null && (
+                    <span className="text-sm text-texto-suave">{ficha.descricao}</span>
+                  )}
+                </div>
+                <ul className="flex flex-col gap-2">
+                  {ficha.exercicios.map((exercicio, indice) => (
+                    <li key={`${exercicio.nome}-${indice}`} className="rounded-lg bg-superficie p-2">
+                      <span className="font-semibold text-texto">{exercicio.nome}</span>
+                      <p className="text-sm text-texto-suave">
+                        {exercicio.series} séries · {exercicio.repeticoesMin}–
+                        {exercicio.repeticoesMax} reps
+                        {exercicio.cargaReferenciaKg !== null &&
+                          ` · ${formatarPesoKg(exercicio.cargaReferenciaKg)}`}{' '}
+                        · {exercicio.descansoSegundos}s descanso
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+            {justificativa !== null && (
+              <div className="flex flex-col gap-3 rounded-xl border border-fogo/30 bg-superficie-2 p-4">
+                <h3 className="font-titulo text-sm font-bold uppercase tracking-[0.15em] text-fogo">
+                  Por que este treino
+                </h3>
+                <div className="flex flex-col gap-1">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-texto-suave">
+                    Escolha do treino
+                  </span>
+                  <p className="text-sm text-texto">{justificativa.porqueDoTreino}</p>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-texto-suave">
+                    Como evoluir
+                  </span>
+                  <p className="text-sm text-texto">{justificativa.comoEvoluir}</p>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-texto-suave">
+                    Nível de assertividade
+                  </span>
+                  <p className="text-sm text-texto">{justificativa.nivelAssertividade}</p>
+                </div>
+              </div>
+            )}
+            <BotaoGrande onClick={() => void aoUsarFichas()}>
+              {fichasGeradas.length === 1 ? 'Usar esta ficha' : 'Usar este treino'}
+            </BotaoGrande>
             <BotaoGrande variante="secundaria" onClick={fechar}>
               Cancelar
             </BotaoGrande>
@@ -96,14 +137,14 @@ export function ModalAssistenteIA({ aberto, aoFechar }: PropsModalAssistenteIA) 
         ) : gerando ? (
           <div className="flex flex-col items-center gap-3 py-8 text-center">
             <p className="text-texto-suave">
-              Gerando sua ficha personalizada, isso pode levar alguns segundos…
+              Gerando seu treino personalizado, isso pode levar alguns segundos…
             </p>
           </div>
         ) : (
           <div className="flex flex-col gap-3">
             <p className="text-texto-suave">
-              A assistente de IA cria uma ficha de treino completa baseada no seu perfil:
-              objetivo, idade, peso, sexo e frequência semanal.
+              A assistente de IA cria um treino semanal completo — uma ficha para cada dia de
+              treino — baseado no seu perfil: objetivo, idade, peso, sexo e frequência semanal.
             </p>
             {erro !== null && (
               <p role="alert" className="text-sm font-medium text-erro">
@@ -111,7 +152,7 @@ export function ModalAssistenteIA({ aberto, aoFechar }: PropsModalAssistenteIA) 
               </p>
             )}
             <BotaoGrande onClick={() => void gerar()}>
-              {erro !== null ? 'Tentar novamente' : 'Gerar ficha com IA'}
+              {erro !== null ? 'Tentar novamente' : 'Gerar treino com IA'}
             </BotaoGrande>
             <BotaoGrande variante="secundaria" onClick={fechar}>
               Cancelar

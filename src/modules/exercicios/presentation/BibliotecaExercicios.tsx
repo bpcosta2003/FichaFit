@@ -3,6 +3,7 @@
 import { useMemo, useState, type FormEvent } from 'react';
 
 import { useExercicios } from '@/modules/exercicios/application/useExercicios';
+import type { ExercicioDefinicao } from '@/modules/exercicios/domain/Exercicio';
 import { BotaoGrande } from '@/shared/components/BotaoGrande';
 
 const TODOS = 'Todos';
@@ -18,6 +19,7 @@ export function BibliotecaExercicios() {
   const [adicionando, setAdicionando] = useState(false);
   const [nomeNovo, setNomeNovo] = useState('');
   const [grupoNovo, setGrupoNovo] = useState('');
+  const [detalhe, setDetalhe] = useState<ExercicioDefinicao | null>(null);
 
   // Grupos musculares distintos presentes no catálogo — viram chips de filtro.
   const grupos = useMemo(() => {
@@ -115,37 +117,60 @@ export function BibliotecaExercicios() {
             {importando ? 'Baixando catálogo…' : 'Baixar catálogo'}
           </BotaoGrande>
         </div>
-      ) : filtrados.length === 0 ? (
-        <p className="rounded-2xl border border-borda bg-superficie px-6 py-8 text-center text-texto-suave">
-          Nenhum exercício encontrado. Tente outro nome ou crie um exercício novo.
-        </p>
       ) : (
-        <ul className="flex flex-col gap-2">
-          {filtrados.map((exercicio) => (
-            <li
-              key={exercicio.id}
-              className="flex min-h-toque items-center gap-3 rounded-xl border border-borda bg-superficie px-4 py-3"
-            >
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-superficie-2 text-fogo">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" className="h-5 w-5" aria-hidden="true">
-                  <path d="M6.5 8v8M17.5 8v8M4 10h2.5M17.5 10H20M4 14h2.5M17.5 14H20M6.5 12h11" />
-                </svg>
-              </div>
-              <div className="flex flex-1 flex-col">
-                <span className="font-titulo font-semibold uppercase tracking-tight text-texto">
-                  {exercicio.nome}
-                </span>
-                <span className="text-sm text-texto-suave">
-                  {exercicio.grupoMuscular ?? 'Grupo não informado'}
-                  {exercicio.isCustom && ' · criado por você'}
-                </span>
-              </div>
-              <span aria-hidden="true" className="text-texto-suave">
-                ›
-              </span>
-            </li>
-          ))}
-        </ul>
+        <>
+          <button
+            type="button"
+            onClick={() => void importarCatalogoWger(true)}
+            disabled={importando}
+            className="min-h-toque self-start text-sm font-medium text-fogo disabled:opacity-50"
+          >
+            {importando ? 'Atualizando catálogo…' : 'Atualizar catálogo'}
+          </button>
+          {filtrados.length === 0 ? (
+            <p className="rounded-2xl border border-borda bg-superficie px-6 py-8 text-center text-texto-suave">
+              Nenhum exercício encontrado. Tente outro nome ou crie um exercício novo.
+            </p>
+          ) : (
+            <ul className="flex flex-col gap-2">
+              {filtrados.map((exercicio) => (
+                <li key={exercicio.id}>
+                  <button
+                    type="button"
+                    onClick={() => setDetalhe(exercicio)}
+                    className="flex min-h-toque w-full items-center gap-3 rounded-xl border border-borda bg-superficie px-4 py-3 text-left active:bg-superficie-2"
+                  >
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-superficie-2 text-fogo">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        strokeLinecap="round"
+                        className="h-5 w-5"
+                        aria-hidden="true"
+                      >
+                        <path d="M6.5 8v8M17.5 8v8M4 10h2.5M17.5 10H20M4 14h2.5M17.5 14H20M6.5 12h11" />
+                      </svg>
+                    </div>
+                    <div className="flex flex-1 flex-col">
+                      <span className="font-titulo font-semibold uppercase tracking-tight text-texto">
+                        {exercicio.nome}
+                      </span>
+                      <span className="text-sm text-texto-suave">
+                        {exercicio.grupoMuscular ?? 'Grupo não informado'}
+                        {exercicio.isCustom && ' · criado por você'}
+                      </span>
+                    </div>
+                    <span aria-hidden="true" className="text-texto-suave">
+                      ›
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
       )}
 
       {adicionando ? (
@@ -181,6 +206,35 @@ export function BibliotecaExercicios() {
         >
           +
         </button>
+      )}
+
+      {detalhe !== null && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="titulo-detalhe-exercicio"
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-4"
+        >
+          <div className="w-full max-w-md rounded-2xl border border-borda bg-superficie p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+            <h2
+              id="titulo-detalhe-exercicio"
+              className="font-titulo text-2xl font-bold uppercase tracking-tight text-texto"
+            >
+              {detalhe.nome}
+            </h2>
+            <p className="mt-1 text-sm font-medium uppercase tracking-wide text-fogo">
+              {detalhe.grupoMuscular ?? 'Grupo não informado'}
+            </p>
+            <p className="mt-4 text-texto-suave">
+              {detalhe.descricao ?? 'Sem descrição disponível para este exercício.'}
+            </p>
+            <div className="mt-6">
+              <BotaoGrande variante="secundaria" onClick={() => setDetalhe(null)}>
+                Fechar
+              </BotaoGrande>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

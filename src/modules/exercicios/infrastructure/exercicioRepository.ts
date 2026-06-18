@@ -66,3 +66,18 @@ export async function obterWgerIdsExistentes(): Promise<Set<number>> {
       .filter((wgerId): wgerId is number => wgerId !== null)
   );
 }
+
+// Mapa wgerId -> id local — usado para sobrescrever (e não duplicar) registros
+// já importados quando o catálogo é atualizado.
+export async function obterIdsLocaisPorWgerId(): Promise<Map<number, string>> {
+  const exercicios = await db.exercicioDefinicoes
+    .filter((exercicio) => exercicio.wgerId !== null)
+    .toArray();
+  const mapa = new Map<number, string>();
+  for (const exercicio of exercicios) {
+    if (exercicio.wgerId !== null) {
+      mapa.set(exercicio.wgerId, exercicio.id);
+    }
+  }
+  return mapa;
+}

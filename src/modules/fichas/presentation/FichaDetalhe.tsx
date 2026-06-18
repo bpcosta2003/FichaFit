@@ -67,6 +67,7 @@ export function FichaDetalhe({ fichaId }: PropsFichaDetalhe) {
   const [formulario, setFormulario] = useState<FormularioExercicio>(FORMULARIO_VAZIO);
   const [erro, setErro] = useState<string | null>(null);
   const [confirmandoExclusao, setConfirmandoExclusao] = useState(false);
+  const [mostrandoJustificativa, setMostrandoJustificativa] = useState(false);
   const [editandoFicha, setEditandoFicha] = useState(false);
   const [nomeFicha, setNomeFicha] = useState('');
   const [descricaoFicha, setDescricaoFicha] = useState('');
@@ -210,6 +211,26 @@ export function FichaDetalhe({ fichaId }: PropsFichaDetalhe) {
             Cancelar
           </BotaoGrande>
         </form>
+      )}
+
+      {ficha.justificativaIA !== null && (
+        <button
+          type="button"
+          onClick={() => setMostrandoJustificativa(true)}
+          className="flex min-h-toque items-center gap-3 rounded-2xl border border-fogo/40 bg-superficie p-4 text-left active:scale-[0.99]"
+        >
+          <span className="gradiente-fogo flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xl">
+            ✨
+          </span>
+          <span className="flex flex-col">
+            <span className="font-titulo text-sm font-bold uppercase tracking-tight text-texto">
+              Por que este treino
+            </span>
+            <span className="text-xs text-texto-suave">
+              Relembre a explicação da IA sobre este treino
+            </span>
+          </span>
+        </button>
       )}
 
       {exercicios.length === 0 && !adicionando && (
@@ -383,6 +404,45 @@ export function FichaDetalhe({ fichaId }: PropsFichaDetalhe) {
           >
             Excluir ficha
           </button>
+        </div>
+      )}
+
+      {mostrandoJustificativa && ficha.justificativaIA !== null && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="titulo-justificativa-ia"
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-4"
+        >
+          <div className="flex max-h-[85vh] w-full max-w-md flex-col gap-4 overflow-y-auto rounded-2xl border border-borda bg-superficie p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+            <h2
+              id="titulo-justificativa-ia"
+              className="font-titulo text-2xl font-bold uppercase tracking-tight text-texto"
+            >
+              Por que este treino
+            </h2>
+            <div className="flex flex-col gap-1">
+              <span className="text-xs font-semibold uppercase tracking-wide text-texto-suave">
+                Escolha do treino
+              </span>
+              <p className="text-sm text-texto">{ficha.justificativaIA.porqueDoTreino}</p>
+            </div>
+            <div className="flex flex-col gap-1">
+              <span className="text-xs font-semibold uppercase tracking-wide text-texto-suave">
+                Como evoluir
+              </span>
+              <p className="text-sm text-texto">{ficha.justificativaIA.comoEvoluir}</p>
+            </div>
+            <div className="flex flex-col gap-1">
+              <span className="text-xs font-semibold uppercase tracking-wide text-texto-suave">
+                Nível de assertividade
+              </span>
+              <p className="text-sm text-texto">{ficha.justificativaIA.nivelAssertividade}</p>
+            </div>
+            <BotaoGrande variante="secundaria" onClick={() => setMostrandoJustificativa(false)}>
+              Fechar
+            </BotaoGrande>
+          </div>
         </div>
       )}
 

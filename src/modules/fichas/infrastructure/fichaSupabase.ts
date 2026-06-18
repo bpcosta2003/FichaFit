@@ -2,7 +2,14 @@
 import { z } from 'zod';
 
 import type { SupabaseBrowser } from '@/shared/supabase/client';
+import type { Json } from '@/shared/supabase/database.types';
 import type { ExercicioFicha, FichaTreino } from '../domain/FichaTreino';
+
+const esquemaJustificativaIA = z.object({
+  porqueDoTreino: z.string(),
+  comoEvoluir: z.string(),
+  nivelAssertividade: z.string(),
+});
 
 const esquemaLinhaFicha = z.object({
   id: z.string(),
@@ -10,6 +17,7 @@ const esquemaLinhaFicha = z.object({
   nome: z.string(),
   descricao: z.string().nullable(),
   grupo_id: z.string().nullable().default(null),
+  justificativa_ia: esquemaJustificativaIA.nullable().default(null),
   criado_em: z.string(),
   atualizado_em: z.string(),
   deletado_em: z.string().nullable(),
@@ -40,6 +48,8 @@ export async function pushFichaParaSupabase(
     nome: ficha.nome,
     descricao: ficha.descricao,
     grupo_id: ficha.grupoId,
+    // JSONB: a justificativa é um objeto plano serializável (ou null).
+    justificativa_ia: ficha.justificativaIA as Json,
     criado_em: ficha.criadoEm,
     atualizado_em: ficha.atualizadoEm,
     deletado_em: ficha.deletadoEm,
@@ -153,6 +163,7 @@ export async function pullFichasDoSupabase(
       descricao: linha.descricao,
       grupoId: linha.grupo_id,
       exercicios,
+      justificativaIA: linha.justificativa_ia,
       criadoEm: linha.criado_em,
       atualizadoEm: linha.atualizado_em,
       deletadoEm: linha.deletado_em,

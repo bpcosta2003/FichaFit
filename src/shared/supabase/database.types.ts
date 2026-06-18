@@ -110,6 +110,7 @@ export interface Database {
           nome: string;
           descricao: string | null;
           grupo_id: string | null;
+          justificativa_ia: Json | null;
           criado_em: string;
           atualizado_em: string;
           deletado_em: string | null;
@@ -120,6 +121,7 @@ export interface Database {
           nome: string;
           descricao?: string | null;
           grupo_id?: string | null;
+          justificativa_ia?: Json | null;
           criado_em?: string;
           atualizado_em?: string;
           deletado_em?: string | null;
@@ -130,6 +132,7 @@ export interface Database {
           nome?: string;
           descricao?: string | null;
           grupo_id?: string | null;
+          justificativa_ia?: Json | null;
           criado_em?: string;
           atualizado_em?: string;
           deletado_em?: string | null;

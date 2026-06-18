@@ -13,6 +13,7 @@ import {
 import { AvatarUsuario } from '@/shared/components/AvatarUsuario';
 import { BotaoGrande } from '@/shared/components/BotaoGrande';
 import { SeletorTema } from '@/shared/components/SeletorTema';
+import { useInstalarApp } from '@/shared/hooks/useInstalarApp';
 import { useSync } from '@/shared/hooks/useSync';
 import { AVATARES, AVATAR_PADRAO_ID } from '@/shared/types/avatares';
 import { formatarDataRelativa } from '@/shared/utils/formatacao';
@@ -38,6 +39,7 @@ const OPCOES_SEXO: { valor: SexoUsuario; rotulo: string }[] = [
 export function PerfilPage() {
   const { usuario, autenticado, carregando, sair } = useAuth();
   const { executarSync, sincronizando, erro: erroSync, ultimaSync, pendentes } = useSync();
+  const { podeInstalar, jaInstalado, precisaInstrucaoIOS, instalar } = useInstalarApp();
   const [avatarId, setAvatarId] = useState(AVATAR_PADRAO_ID);
   const [objetivo, setObjetivo] = useState<ObjetivoTreino | ''>('');
   const [idade, setIdade] = useState('');
@@ -255,6 +257,38 @@ export function PerfilPage() {
           >
             {salvandoTreino ? 'Salvando…' : 'Salvar perfil de treino'}
           </BotaoGrande>
+        </section>
+      )}
+
+      {!jaInstalado && (
+        <section className="flex flex-col gap-3 rounded-2xl border border-borda bg-superficie p-4">
+          <h2 className="font-titulo text-sm font-semibold uppercase tracking-wide text-texto">
+            Instalar o app
+          </h2>
+          <p className="text-sm text-texto-suave">
+            Instale o FichaFit no seu aparelho para abrir direto da tela inicial, em tela cheia e
+            funcionando offline.
+          </p>
+          {precisaInstrucaoIOS ? (
+            <p className="text-sm text-texto-suave">
+              No iPhone/iPad: toque em{' '}
+              <span className="font-semibold text-texto">Compartilhar</span> e depois em{' '}
+              <span className="font-semibold text-texto">Adicionar à Tela de Início</span>.
+            </p>
+          ) : (
+            <BotaoGrande onClick={() => void instalar()} disabled={!podeInstalar}>
+              {podeInstalar ? 'Baixar o app' : 'Instalação indisponível neste navegador'}
+            </BotaoGrande>
+          )}
+        </section>
+      )}
+
+      {jaInstalado && (
+        <section className="flex flex-col gap-2 rounded-2xl border border-borda bg-superficie p-4">
+          <h2 className="font-titulo text-sm font-semibold uppercase tracking-wide text-texto">
+            Instalar o app
+          </h2>
+          <p className="text-sm text-texto-suave">O FichaFit já está instalado neste aparelho. ✅</p>
         </section>
       )}
 

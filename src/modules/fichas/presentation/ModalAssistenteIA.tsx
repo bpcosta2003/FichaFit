@@ -14,7 +14,7 @@ interface PropsModalAssistenteIA {
 
 export function ModalAssistenteIA({ aberto, aoFechar }: PropsModalAssistenteIA) {
   const router = useRouter();
-  const { gerando, erro, codigoErro, fichasGeradas, gerar, limpar, usarFichasGeradas } =
+  const { gerando, erro, codigoErro, fichasGeradas, justificativa, gerar, limpar, usarFichasGeradas } =
     useAssistenteIA();
 
   if (!aberto) {
@@ -102,6 +102,31 @@ export function ModalAssistenteIA({ aberto, aoFechar }: PropsModalAssistenteIA) 
                 </ul>
               </div>
             ))}
+            {justificativa !== null && (
+              <div className="flex flex-col gap-3 rounded-xl border border-fogo/30 bg-superficie-2 p-4">
+                <h3 className="font-titulo text-sm font-bold uppercase tracking-[0.15em] text-fogo">
+                  Por que este treino
+                </h3>
+                <div className="flex flex-col gap-1">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-texto-suave">
+                    Escolha do treino
+                  </span>
+                  <p className="text-sm text-texto">{justificativa.porqueDoTreino}</p>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-texto-suave">
+                    Como evoluir
+                  </span>
+                  <p className="text-sm text-texto">{justificativa.comoEvoluir}</p>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-texto-suave">
+                    Nível de assertividade
+                  </span>
+                  <p className="text-sm text-texto">{justificativa.nivelAssertividade}</p>
+                </div>
+              </div>
+            )}
             <BotaoGrande onClick={() => void aoUsarFichas()}>
               {fichasGeradas.length === 1 ? 'Usar esta ficha' : 'Usar este treino'}
             </BotaoGrande>

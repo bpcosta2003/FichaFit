@@ -34,9 +34,41 @@ const esquemaFichaGerada = z.object({
   exercicios: z.array(esquemaExercicioGerado).min(1).max(15),
 });
 
+const esquemaJustificativa = z.object({
+  porqueDoTreino: z.string().min(1),
+  comoEvoluir: z.string().min(1),
+  nivelAssertividade: z.string().min(1),
+});
+
 const esquemaSemanaGerada = z.object({
   fichas: z.array(esquemaFichaGerada).min(1).max(7),
+  justificativa: esquemaJustificativa,
 });
+
+const ESQUEMA_JUSTIFICATIVA_JSON = {
+  type: 'object',
+  properties: {
+    porqueDoTreino: {
+      type: 'string',
+      description:
+        'Texto expandido em português explicando por que esta divisão de treino e estes exercícios ' +
+        'foram escolhidos para o perfil (objetivo, idade, sexo, peso e frequência semanal).',
+    },
+    comoEvoluir: {
+      type: 'string',
+      description:
+        'Texto expandido em português com os motivos e a estratégia para evoluir neste treino ' +
+        '(progressão de carga, repetições, frequência) ao longo das próximas semanas.',
+    },
+    nivelAssertividade: {
+      type: 'string',
+      description:
+        'Texto curto em português indicando o nível de assertividade/confiança de que este treino ' +
+        'gera resultado para o objetivo, com a principal ressalva (ex: aderência, alimentação, descanso).',
+    },
+  },
+  required: ['porqueDoTreino', 'comoEvoluir', 'nivelAssertividade'],
+} as const;
 
 const ESQUEMA_FICHA_JSON = {
   type: 'object',
@@ -80,7 +112,8 @@ const ESQUEMA_FICHA_JSON = {
 const FERRAMENTA_GERAR_SEMANA: Anthropic.Tool = {
   name: 'gerar_treino_semanal',
   description:
-    'Cria um conjunto de fichas de treino — uma por dia de treino da semana — personalizadas para o usuário.',
+    'Cria um conjunto de fichas de treino — uma por dia de treino da semana — personalizadas para o ' +
+    'usuário, junto de uma justificativa explicando as escolhas, a progressão e o nível de assertividade.',
   input_schema: {
     type: 'object',
     properties: {
@@ -90,8 +123,9 @@ const FERRAMENTA_GERAR_SEMANA: Anthropic.Tool = {
         maxItems: 7,
         items: ESQUEMA_FICHA_JSON,
       },
+      justificativa: ESQUEMA_JUSTIFICATIVA_JSON,
     },
-    required: ['fichas'],
+    required: ['fichas', 'justificativa'],
   },
 };
 
@@ -156,16 +190,40 @@ export async function POST(): Promise<NextResponse> {
 
     const rotuloObjetivo = ROTULOS_OBJETIVO[perfil.objetivo] ?? perfil.objetivo;
     const diasPorSemana = perfil.dias_por_semana;
-    const prompt =
-      `Crie um treino de musculação semanal completo, dividido em ${diasPorSemana} ficha(s) — ` +
-      `uma para cada dia de treino —, personalizado em português brasileiro para uma pessoa de ` +
-      `${perfil.idade} anos, sexo ${perfil.sexo}, pesando ${perfil.peso_kg} kg, com objetivo de ` +
-      `${rotuloObjetivo}. Cada ficha deve ter um nome que indique o dia/foco (ex: "Treino A — Peito e ` +
-      `Tríceps", "Treino B — Costas e Bíceps") e um foco muscular diferente das demais, para favorecer ` +
-      `a recuperação entre os grupos musculares ao longo da semana. Cada ficha deve ter de 4 a 8 ` +
-      `exercícios com nomes em português, séries, faixa de repetições, tempo de descanso em segundos e, ` +
-      `quando fizer sentido, uma carga de referência em kg. Gere exatamente ${diasPorSemana} ficha(s). ` +
-      `Use a ferramenta gerar_treino_semanal para responder.`;
+    const prompt = `[ROLE]
+Você é um personal trainer certificado e especialista em treinamento de força e condicionamento, com experiência no planejamento individualizado de treinos resistidos para o contexto fitness brasileiro.
+
+[OBJECTIVE]
+Gerar um treino semanal de musculação personalizado em português brasileiro para o perfil de usuário abaixo, dividido em exatamente ${diasPorSemana} ficha(s) — uma por dia de treino —, onde cada ficha é um treino completo e imediatamente executável com 4 a 8 exercícios. Além das fichas, gerar uma justificativa explicando as escolhas, a progressão e o nível de assertividade. Entregue tudo usando a ferramenta gerar_treino_semanal.
+
+[CONTEXT]
+Perfil do usuário:
+- Idade: ${perfil.idade} anos
+- Sexo: ${perfil.sexo}
+- Peso corporal: ${perfil.peso_kg} kg
+- Objetivo principal: ${rotuloObjetivo}
+- Frequência semanal de treino: ${diasPorSemana} dia(s) por semana
+
+A seleção de exercícios, volume, intensidade e descanso devem ser calibrados ao objetivo, ao perfil biológico e à frequência semanal disponível.
+
+[INSTRUCTIONS]
+- Analise o perfil e determine a divisão de treino mais apropriada para a frequência informada (ex: full-body para 1–2 dias; upper/lower ou push/pull/legs para 3+ dias), distribuindo os grupos musculares ao longo da semana para favorecer a recuperação.
+- Gere exatamente ${diasPorSemana} ficha(s); cada ficha deve ter um nome indicando o dia/foco (ex: "Treino A — Peito e Tríceps", "Treino B — Costas e Bíceps") e um foco diferente das demais.
+- Para cada ficha, selecione de 4 a 8 exercícios apropriados ao objetivo, idade e sexo, priorizando movimentos compostos primeiro quando relevante (lógica progressiva: ativação/aquecimento antes dos compostos pesados quando aplicável).
+- Para cada exercício defina: nome (em português BR), número de séries, faixa de repetições (repeticoesMin e repeticoesMax), tempo de descanso em segundos e carga de referência em kg — inclua a carga apenas quando puder ser razoavelmente estimada pelo peso corporal, sexo, idade e objetivo; use null quando não houver dados suficientes.
+- Preencha a justificativa com: porqueDoTreino (por que esta divisão e estes exercícios foram escolhidos para o perfil), comoEvoluir (motivos e estratégia de progressão ao longo das semanas) e nivelAssertividade (nível de confiança de que o treino gera resultado, com a principal ressalva).
+
+[CONSTRAINTS]
+- Todo o conteúdo deve estar inteiramente em português brasileiro.
+- Use a nomenclatura padrão brasileira para os exercícios (ex: "Supino Reto", "Agachamento Livre", "Remada Curvada").
+- Não inclua exercícios de alto risco de lesão sem justificativa clara do perfil (ex: evite levantamentos olímpicos para perfis sedentários ou mais velhos).
+- Não invente dados do usuário; use apenas as variáveis fornecidas. Se algum valor faltar, aplique um padrão conservador apropriado para iniciantes.
+- Cargas de referência em quilogramas devem refletir pontos de partida realistas, não padrões de atletas de elite.
+
+[QUALITY CRITERIA]
+Antes de chamar a ferramenta, verifique que cada ficha tem entre 4 e 8 exercícios, todos com nome em português, séries, faixa de repetições e descanso; que as cargas estão presentes só onde justificadas e são plausíveis; que a divisão é coerente com a frequência semanal; que volume e intensidade são adequados ao objetivo (${rotuloObjetivo}); e que nenhum campo contém texto placeholder, valores indefinidos ou termos não traduzidos.
+
+Responda exclusivamente através da ferramenta gerar_treino_semanal.`;
 
     const anthropic = new Anthropic({ apiKey: chaveApi });
     let mensagem: Anthropic.Message;
@@ -206,7 +264,10 @@ export async function POST(): Promise<NextResponse> {
       console.warn('[ia] Falha ao registrar geração para rate limit:', erroRegistro.message);
     }
 
-    return NextResponse.json({ fichas: resultado.data.fichas });
+    return NextResponse.json({
+      fichas: resultado.data.fichas,
+      justificativa: resultado.data.justificativa,
+    });
   } catch (causa) {
     console.warn('[ia] Erro inesperado ao gerar ficha:', causa);
     return respostaErro('Erro inesperado ao gerar a ficha.', 'ERRO_INTERNO', 500);

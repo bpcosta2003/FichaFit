@@ -23,6 +23,12 @@ export interface FichaGeradaIA {
   exercicios: ExercicioGeradoIA[];
 }
 
+export interface JustificativaIA {
+  porqueDoTreino: string;
+  comoEvoluir: string;
+  nivelAssertividade: string;
+}
+
 const MENSAGENS_ERRO: Record<string, string> = {
   NAO_AUTENTICADO: 'Entre com seu email para usar a assistente de IA.',
   PERFIL_INCOMPLETO: 'Complete seu perfil de treino para gerar uma ficha com a IA.',
@@ -38,6 +44,7 @@ export interface EstadoAssistenteIA {
   erro: string | null;
   codigoErro: string | null;
   fichasGeradas: FichaGeradaIA[] | null;
+  justificativa: JustificativaIA | null;
   gerar: () => Promise<void>;
   limpar: () => void;
   usarFichasGeradas: () => Promise<FichaTreino[]>;
@@ -49,12 +56,14 @@ export function useAssistenteIA(): EstadoAssistenteIA {
   const [erro, setErro] = useState<string | null>(null);
   const [codigoErro, setCodigoErro] = useState<string | null>(null);
   const [fichasGeradas, setFichasGeradas] = useState<FichaGeradaIA[] | null>(null);
+  const [justificativa, setJustificativa] = useState<JustificativaIA | null>(null);
 
   const gerar = useCallback(async () => {
     setGerando(true);
     setErro(null);
     setCodigoErro(null);
     setFichasGeradas(null);
+    setJustificativa(null);
     try {
       const resposta = await fetch('/api/ia/gerar-treino', { method: 'POST' });
       const corpo = await resposta.json();
@@ -65,6 +74,7 @@ export function useAssistenteIA(): EstadoAssistenteIA {
         return;
       }
       setFichasGeradas(corpo.fichas as FichaGeradaIA[]);
+      setJustificativa((corpo.justificativa as JustificativaIA | undefined) ?? null);
     } catch (causa) {
       console.warn('[ia] Falha ao chamar o endpoint de geração:', causa);
       setCodigoErro('ERRO_INTERNO');
@@ -78,6 +88,7 @@ export function useAssistenteIA(): EstadoAssistenteIA {
     setErro(null);
     setCodigoErro(null);
     setFichasGeradas(null);
+    setJustificativa(null);
   }, []);
 
   const usarFichasGeradas = useCallback(async (): Promise<FichaTreino[]> => {
@@ -114,5 +125,14 @@ export function useAssistenteIA(): EstadoAssistenteIA {
     return fichasCriadas;
   }, [fichasGeradas, usuarioId]);
 
-  return { gerando, erro, codigoErro, fichasGeradas, gerar, limpar, usarFichasGeradas };
+  return {
+    gerando,
+    erro,
+    codigoErro,
+    fichasGeradas,
+    justificativa,
+    gerar,
+    limpar,
+    usarFichasGeradas,
+  };
 }

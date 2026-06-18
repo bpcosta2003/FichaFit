@@ -20,11 +20,23 @@ const GRUPOS_MUSCULARES: Record<number, string> = {
   15: 'Cardio',
 };
 
-const esquemaExercicioWger = z.object({
-  id: z.number(),
+// A API wger não tem mais "name"/"description" direto no /exercise/ — eles
+// ficam em "translations" (uma por idioma). /exerciseinfo/ retorna o
+// exercício já com a categoria e todas as traduções aninhadas.
+const esquemaTraducao = z.object({
+  language: z.number(),
   name: z.string().optional().nullable(),
   description: z.string().optional().nullable(),
-  category: z.number().optional().nullable(),
+});
+
+const esquemaCategoria = z.object({
+  id: z.number(),
+});
+
+const esquemaExercicioWger = z.object({
+  id: z.number(),
+  category: esquemaCategoria.optional().nullable(),
+  translations: z.array(esquemaTraducao).optional().default([]),
 });
 
 const esquemaRespostaWger = z.object({
@@ -43,12 +55,24 @@ function removerHtml(texto: string): string {
   return texto.replace(/<[^>]*>/g, '').trim();
 }
 
-async function buscarPagina(idioma: number, pagina: number): Promise<{
+function escolherTraducao(
+  traducoes: z.infer<typeof esquemaTraducao>[]
+): z.infer<typeof esquemaTraducao> | null {
+  for (const idioma of [IDIOMA_PORTUGUES, IDIOMA_INGLES]) {
+    const traducao = traducoes.find((t) => t.language === idioma && t.name?.trim());
+    if (traducao) {
+      return traducao;
+    }
+  }
+  return null;
+}
+
+async function buscarPagina(pagina: number): Promise<{
   exercicios: ExercicioWger[];
   temProxima: boolean;
 }> {
   const offset = pagina * LIMITE_POR_PAGINA;
-  const url = `${WGER_BASE_URL}/exercise/?format=json&language=${idioma}&limit=${LIMITE_POR_PAGINA}&offset=${offset}`;
+  const url = `${WGER_BASE_URL}/exerciseinfo/?format=json&limit=${LIMITE_POR_PAGINA}&offset=${offset}`;
   const resposta = await fetch(url);
   if (!resposta.ok) {
     throw new Error(`API wger respondeu com status ${resposta.status}`);
@@ -62,7 +86,8 @@ async function buscarPagina(idioma: number, pagina: number): Promise<{
       continue;
     }
     const item = resultado.data;
-    const nome = item.name?.trim();
+    const traducao = escolherTraducao(item.translations);
+    const nome = traducao?.name?.trim();
     if (!nome) {
       continue;
     }
@@ -70,28 +95,21 @@ async function buscarPagina(idioma: number, pagina: number): Promise<{
       wgerId: item.id,
       nome,
       grupoMuscular:
-        item.category != null ? (GRUPOS_MUSCULARES[item.category] ?? null) : null,
-      descricao: item.description ? removerHtml(item.description) || null : null,
+        item.category != null ? (GRUPOS_MUSCULARES[item.category.id] ?? null) : null,
+      descricao: traducao?.description ? removerHtml(traducao.description) || null : null,
     });
   }
   return { exercicios, temProxima: corpo.next !== null };
 }
 
-// Busca até 3 páginas × 100 exercícios. Tenta português primeiro;
-// se o catálogo vier vazio, faz fallback para inglês.
 export async function buscarExerciciosWger(): Promise<ExercicioWger[]> {
-  for (const idioma of [IDIOMA_PORTUGUES, IDIOMA_INGLES]) {
-    const todos: ExercicioWger[] = [];
-    for (let pagina = 0; pagina < MAX_PAGINAS; pagina += 1) {
-      const { exercicios, temProxima } = await buscarPagina(idioma, pagina);
-      todos.push(...exercicios);
-      if (!temProxima) {
-        break;
-      }
-    }
-    if (todos.length > 0) {
-      return todos;
+  const todos: ExercicioWger[] = [];
+  for (let pagina = 0; pagina < MAX_PAGINAS; pagina += 1) {
+    const { exercicios, temProxima } = await buscarPagina(pagina);
+    todos.push(...exercicios);
+    if (!temProxima) {
+      break;
     }
   }
-  return [];
+  return todos;
 }

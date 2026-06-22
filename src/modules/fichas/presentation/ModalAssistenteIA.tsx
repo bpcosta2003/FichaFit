@@ -60,9 +60,9 @@ export function ModalAssistenteIA({ aberto, aoFechar }: PropsModalAssistenteIA) 
               a assistente conseguir gerar uma ficha personalizada para você.
             </p>
             <Link href="/perfil" onClick={fechar}>
-              <BotaoGrande>Completar perfil</BotaoGrande>
+              <BotaoGrande tamanho="medio">Completar perfil</BotaoGrande>
             </Link>
-            <BotaoGrande variante="secundaria" onClick={fechar}>
+            <BotaoGrande variante="secundaria" tamanho="medio" onClick={fechar}>
               Cancelar
             </BotaoGrande>
           </div>
@@ -127,10 +127,10 @@ export function ModalAssistenteIA({ aberto, aoFechar }: PropsModalAssistenteIA) 
                 </div>
               </div>
             )}
-            <BotaoGrande onClick={() => void aoUsarFichas()}>
+            <BotaoGrande tamanho="medio" onClick={() => void aoUsarFichas()}>
               {fichasGeradas.length === 1 ? 'Usar esta ficha' : 'Usar este treino'}
             </BotaoGrande>
-            <BotaoGrande variante="secundaria" onClick={fechar}>
+            <BotaoGrande variante="secundaria" tamanho="medio" onClick={fechar}>
               Cancelar
             </BotaoGrande>
           </div>
@@ -151,10 +151,10 @@ export function ModalAssistenteIA({ aberto, aoFechar }: PropsModalAssistenteIA) 
                 {erro}
               </p>
             )}
-            <BotaoGrande onClick={() => void gerar()}>
+            <BotaoGrande tamanho="medio" onClick={() => void gerar()}>
               {erro !== null ? 'Tentar novamente' : 'Gerar treino com IA'}
             </BotaoGrande>
-            <BotaoGrande variante="secundaria" onClick={fechar}>
+            <BotaoGrande variante="secundaria" tamanho="medio" onClick={fechar}>
               Cancelar
             </BotaoGrande>
           </div>

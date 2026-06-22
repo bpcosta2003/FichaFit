@@ -101,7 +101,7 @@ export function FichaTreinoPage({ fichaId }: PropsFichaTreinoPage) {
         <p className="text-lg text-texto">
           {erro ?? 'Não foi possível abrir esta sessão de treino.'}
         </p>
-        <BotaoGrande variante="secundaria" onClick={() => router.push('/treinos')}>
+        <BotaoGrande variante="secundaria" tamanho="medio" onClick={() => router.push('/treinos')}>
           Voltar para as fichas
         </BotaoGrande>
       </div>
@@ -119,7 +119,7 @@ export function FichaTreinoPage({ fichaId }: PropsFichaTreinoPage) {
           type="button"
           aria-label="Voltar para as fichas"
           onClick={() => router.push('/treinos')}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-texto-suave active:bg-superficie"
+          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-texto-suave active:bg-superficie"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-6 w-6" aria-hidden="true">
             <path d="M15 6l-6 6 6 6" strokeLinecap="round" strokeLinejoin="round" />

@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useMemo, useState, type FormEvent } from 'react';
 
 import { useExercicios } from '@/modules/exercicios/application/useExercicios';
@@ -54,7 +55,7 @@ export function BibliotecaExercicios() {
 
   return (
     <div className="flex flex-col gap-4 px-5 py-6">
-      <h1 className="font-titulo text-5xl font-bold uppercase leading-[0.9] tracking-tight text-texto">
+      <h1 className="font-titulo text-5xl font-bold uppercase leading-tight tracking-tight text-texto">
         Exercícios
       </h1>
 
@@ -91,7 +92,7 @@ export function BibliotecaExercicios() {
                 onClick={() => setGrupo(g)}
                 className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
                   ativo
-                    ? 'gradiente-fogo text-black'
+                    ? 'gradiente-fogo text-sobre-fogo'
                     : 'border border-borda bg-superficie text-texto-suave active:bg-superficie-2'
                 }`}
               >
@@ -153,8 +154,8 @@ export function BibliotecaExercicios() {
                         <path d="M6.5 8v8M17.5 8v8M4 10h2.5M17.5 10H20M4 14h2.5M17.5 14H20M6.5 12h11" />
                       </svg>
                     </div>
-                    <div className="flex flex-1 flex-col">
-                      <span className="font-titulo font-semibold uppercase tracking-tight text-texto">
+                    <div className="flex min-w-0 flex-1 flex-col">
+                      <span className="break-words font-titulo font-semibold uppercase tracking-tight text-texto">
                         {exercicio.nome}
                       </span>
                       <span className="text-sm text-texto-suave">
@@ -192,8 +193,15 @@ export function BibliotecaExercicios() {
             onChange={(evento) => setGrupoNovo(evento.target.value)}
             className={CLASSE_INPUT}
           />
-          <BotaoGrande type="submit">Salvar exercício</BotaoGrande>
-          <BotaoGrande type="button" variante="secundaria" onClick={() => setAdicionando(false)}>
+          <BotaoGrande type="submit" tamanho="medio">
+            Salvar exercício
+          </BotaoGrande>
+          <BotaoGrande
+            type="button"
+            variante="secundaria"
+            tamanho="medio"
+            onClick={() => setAdicionando(false)}
+          >
             Cancelar
           </BotaoGrande>
         </form>
@@ -202,7 +210,7 @@ export function BibliotecaExercicios() {
           type="button"
           aria-label="Criar exercício próprio"
           onClick={() => setAdicionando(true)}
-          className="gradiente-fogo fixed bottom-24 right-5 z-30 flex h-16 w-16 items-center justify-center rounded-full text-3xl font-bold text-black shadow-fogo active:scale-95"
+          className="gradiente-fogo fixed bottom-24 right-5 z-30 flex h-16 w-16 items-center justify-center rounded-full text-3xl font-bold text-sobre-fogo shadow-fogo active:scale-95"
         >
           +
         </button>
@@ -218,13 +226,24 @@ export function BibliotecaExercicios() {
           <div className="w-full max-w-md rounded-2xl border border-borda bg-superficie p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
             <h2
               id="titulo-detalhe-exercicio"
-              className="font-titulo text-2xl font-bold uppercase tracking-tight text-texto"
+              className="break-words font-titulo text-2xl font-bold uppercase tracking-tight text-texto"
             >
               {detalhe.nome}
             </h2>
             <p className="mt-1 text-sm font-medium uppercase tracking-wide text-fogo">
               {detalhe.grupoMuscular ?? 'Grupo não informado'}
             </p>
+            {detalhe.imagemUrl !== null && (
+              <div className="relative mt-4 h-48 w-full overflow-hidden rounded-xl bg-superficie-2">
+                <Image
+                  src={detalhe.imagemUrl}
+                  alt={`Demonstração do exercício ${detalhe.nome}`}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 448px) 100vw, 448px"
+                />
+              </div>
+            )}
             <p className="mt-4 text-texto-suave">
               {detalhe.descricao ?? 'Sem descrição disponível para este exercício.'}
             </p>

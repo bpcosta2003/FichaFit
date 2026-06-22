@@ -18,6 +18,8 @@ const config: Config = {
           claro: '#FB923C',
           escuro: '#D97706',
         },
+        // Texto/ícone sobre o gradiente âmbar — legível nos dois temas.
+        'sobre-fogo': 'var(--cor-sobre-fogo)',
         sucesso: '#22C55E',
         erro: '#EF4444',
       },
@@ -27,8 +29,8 @@ const config: Config = {
         numero: ['var(--fonte-numero)', 'system-ui', 'sans-serif'],
       },
       boxShadow: {
-        // Brilho do âmbar — usado no FAB e em destaques (estilo pôster).
-        fogo: '0 8px 24px -6px rgba(245, 158, 11, 0.5)',
+        // Brilho sutil do âmbar — reservado para os FABs circulares flutuantes.
+        fogo: '0 4px 12px -4px rgba(245, 158, 11, 0.25)',
       },
       minHeight: {
         toque: '48px',

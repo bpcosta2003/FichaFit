@@ -43,10 +43,14 @@ export function ModalConfirmacao({
         </h2>
         <p className="mt-2 text-texto-suave">{descricao}</p>
         <div className="mt-6 flex flex-col gap-3">
-          <BotaoGrande variante={perigo ? 'perigo' : 'primaria'} onClick={aoConfirmar}>
+          <BotaoGrande
+            variante={perigo ? 'perigo' : 'primaria'}
+            tamanho="medio"
+            onClick={aoConfirmar}
+          >
             {rotuloConfirmar}
           </BotaoGrande>
-          <BotaoGrande variante="secundaria" onClick={aoCancelar}>
+          <BotaoGrande variante="secundaria" tamanho="medio" onClick={aoCancelar}>
             {rotuloCancelar}
           </BotaoGrande>
         </div>

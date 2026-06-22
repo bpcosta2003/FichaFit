@@ -27,7 +27,7 @@ export function TimerDescanso({ segundosRestantes, total }: PropsTimerDescanso) 
             cy="100"
             r={RAIO}
             fill="none"
-            stroke="#F59E0B"
+            stroke="var(--cor-fogo)"
             strokeWidth={10}
             strokeLinecap="round"
             strokeDasharray={CIRCUNFERENCIA}

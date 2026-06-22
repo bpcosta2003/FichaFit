@@ -71,6 +71,7 @@ export interface Database {
           nome: string;
           grupo_muscular: string | null;
           descricao: string | null;
+          imagem_url: string | null;
           is_custom: boolean;
           usuario_id: string | null;
           criado_em: string;
@@ -83,6 +84,7 @@ export interface Database {
           nome: string;
           grupo_muscular?: string | null;
           descricao?: string | null;
+          imagem_url?: string | null;
           is_custom?: boolean;
           usuario_id?: string | null;
           criado_em?: string;
@@ -95,6 +97,7 @@ export interface Database {
           nome?: string;
           grupo_muscular?: string | null;
           descricao?: string | null;
+          imagem_url?: string | null;
           is_custom?: boolean;
           usuario_id?: string | null;
           criado_em?: string;

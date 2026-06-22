@@ -4,6 +4,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { useCallback, useState } from 'react';
 
 import { useAuth } from '@/modules/auth/application/useAuth';
+import { obterImagensPorIds } from '@/modules/exercicios/infrastructure/exercicioRepository';
 import { obterFicha } from '@/modules/fichas/infrastructure/fichaRepository';
 import { sincronizar } from '@/shared/sync/syncEngine';
 import {
@@ -67,7 +68,14 @@ export function useSessaoAtiva(fichaId: string): EstadoSessaoAtiva {
         setErro('Ficha não encontrada.');
         return;
       }
-      await salvarSessao(iniciarSessao(ficha));
+      const imagensPorId = await obterImagensPorIds(
+        ficha.exercicios.map((exercicio) => exercicio.exercicioDefinicaoId)
+      );
+      await salvarSessao(
+        iniciarSessao(ficha, (exercicioDefinicaoId) =>
+          exercicioDefinicaoId !== null ? imagensPorId.get(exercicioDefinicaoId) ?? null : null
+        )
+      );
     } catch (causa) {
       setErro(causa instanceof Error ? causa.message : 'Não foi possível iniciar o treino.');
     }

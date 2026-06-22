@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+
 import type { ExercicioSessao, SerieRealizada } from '@/modules/sessao/domain/SessaoTreino';
 import { formatarPesoKg } from '@/shared/utils/formatacao';
 
@@ -25,9 +27,23 @@ export function CardExercicio({
       <p className="font-titulo text-xs font-semibold uppercase tracking-[0.2em] text-fogo">
         Exercício {indice + 1} de {totalExercicios}
       </p>
-      <h2 className="font-titulo text-4xl font-bold uppercase leading-[0.95] tracking-tight text-texto">
-        {exercicio.nome}
-      </h2>
+      <div className="flex items-center gap-3">
+        {exercicio.imagemUrl !== null && (
+          <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-superficie-2">
+            <Image
+              src={exercicio.imagemUrl}
+              alt=""
+              aria-hidden="true"
+              fill
+              className="object-cover"
+              sizes="64px"
+            />
+          </div>
+        )}
+        <h2 className="min-w-0 flex-1 break-words font-titulo text-4xl font-bold uppercase leading-tight tracking-tight text-texto">
+          {exercicio.nome}
+        </h2>
+      </div>
 
       <div className="flex items-center gap-3">
         <div className="flex flex-1 gap-1.5" aria-label="Séries concluídas">

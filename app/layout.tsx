@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 
+import { CapturadorInstalacaoPwa } from '@/shared/components/CapturadorInstalacaoPwa';
 import { fonteNumero, fonteTexto, fonteTitulo } from './fonts';
 import './globals.css';
 
@@ -43,6 +44,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: SCRIPT_TEMA }} />
       </head>
       <body className="font-sans" suppressHydrationWarning>
+        <CapturadorInstalacaoPwa />
         {children}
       </body>
     </html>

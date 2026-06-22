@@ -27,7 +27,7 @@ export function SeletorTema() {
             aria-checked={ativo}
             onClick={() => definir(opcao.valor)}
             className={`min-h-toque flex-1 rounded-lg text-sm font-semibold transition-colors ${
-              ativo ? 'gradiente-fogo text-black' : 'text-texto-suave active:bg-superficie'
+              ativo ? 'gradiente-fogo text-sobre-fogo' : 'text-texto-suave active:bg-superficie'
             }`}
           >
             {opcao.rotulo}

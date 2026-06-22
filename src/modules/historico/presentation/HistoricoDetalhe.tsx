@@ -33,7 +33,7 @@ export function HistoricoDetalhe({ sessaoId }: PropsHistoricoDetalhe) {
     return (
       <div className="flex flex-col gap-4 px-5 py-8 text-center">
         <p className="text-texto-suave">Sessão não encontrada.</p>
-        <BotaoGrande variante="secundaria" onClick={() => router.push('/historico')}>
+        <BotaoGrande variante="secundaria" tamanho="medio" onClick={() => router.push('/historico')}>
           Voltar para o histórico
         </BotaoGrande>
       </div>
@@ -59,7 +59,7 @@ export function HistoricoDetalhe({ sessaoId }: PropsHistoricoDetalhe) {
             type="button"
             aria-label="Voltar para o histórico"
             onClick={() => router.push('/historico')}
-            className="flex h-10 w-10 items-center justify-center rounded-full text-texto-suave active:bg-superficie"
+            className="flex h-12 w-12 items-center justify-center rounded-full text-texto-suave active:bg-superficie"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-6 w-6" aria-hidden="true">
               <path d="M15 6l-6 6 6 6" strokeLinecap="round" strokeLinejoin="round" />
@@ -69,7 +69,7 @@ export function HistoricoDetalhe({ sessaoId }: PropsHistoricoDetalhe) {
         <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-fogo/30 bg-fogo/10 text-3xl">
           🏆
         </div>
-        <h1 className="font-titulo text-4xl font-bold uppercase leading-[0.95] tracking-tight text-texto">
+        <h1 className="break-words font-titulo text-4xl font-bold uppercase leading-tight tracking-tight text-texto">
           {concluida ? 'Treino concluído!' : sessao.nomeFicha}
         </h1>
         <p className="text-texto-suave">
@@ -116,7 +116,7 @@ export function HistoricoDetalhe({ sessaoId }: PropsHistoricoDetalhe) {
                 key={exercicio.exercicioFichaId}
                 className="rounded-2xl border border-borda bg-superficie p-4"
               >
-                <h2 className="font-titulo text-lg font-semibold uppercase tracking-tight text-texto">
+                <h2 className="break-words font-titulo text-lg font-semibold uppercase tracking-tight text-texto">
                   {exercicio.nome}
                 </h2>
                 <ul className="mt-2 flex flex-col gap-1">
@@ -135,7 +135,9 @@ export function HistoricoDetalhe({ sessaoId }: PropsHistoricoDetalhe) {
         </ul>
       )}
 
-      <BotaoGrande onClick={() => router.push('/treinos')}>Voltar aos treinos</BotaoGrande>
+      <BotaoGrande tamanho="medio" onClick={() => router.push('/treinos')}>
+        Voltar aos treinos
+      </BotaoGrande>
     </div>
   );
 }

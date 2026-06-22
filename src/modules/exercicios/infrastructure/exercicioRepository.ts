@@ -11,6 +11,7 @@ const esquemaExercicio = z.object({
   nome: z.string(),
   grupoMuscular: z.string().nullable(),
   descricao: z.string().nullable(),
+  imagemUrl: z.string().nullable().default(null),
   isCustom: z.boolean(),
   usuarioId: z.string().nullable(),
   criadoEm: z.string(),
@@ -65,6 +66,25 @@ export async function obterWgerIdsExistentes(): Promise<Set<number>> {
       .map((exercicio) => exercicio.wgerId)
       .filter((wgerId): wgerId is number => wgerId !== null)
   );
+}
+
+// Mapa exercicioDefinicaoId -> imagemUrl — usado ao iniciar uma sessão, para
+// anexar a foto do catálogo a cada exercício (a ficha não guarda essa foto).
+export async function obterImagensPorIds(
+  ids: Array<string | null>
+): Promise<Map<string, string | null>> {
+  const idsValidos = Array.from(new Set(ids.filter((id): id is string => id !== null)));
+  const brutos = await db.exercicioDefinicoes.bulkGet(idsValidos);
+  const mapa = new Map<string, string | null>();
+  brutos.forEach((bruto, indice) => {
+    const id = idsValidos[indice];
+    if (id === undefined) {
+      return;
+    }
+    const exercicio = bruto !== undefined ? validarExercicio(bruto) : null;
+    mapa.set(id, exercicio?.imagemUrl ?? null);
+  });
+  return mapa;
 }
 
 // Mapa wgerId -> id local — usado para sobrescrever (e não duplicar) registros

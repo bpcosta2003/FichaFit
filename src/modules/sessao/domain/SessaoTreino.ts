@@ -17,6 +17,8 @@ export interface ExercicioSessao {
   repeticoesMax: number;
   cargaReferenciaKg: number | null;
   descansoSegundos: number;
+  // Foto de como executar o exercício — vem do catálogo, não da ficha.
+  imagemUrl: string | null;
 }
 
 export interface SerieRealizada {
@@ -51,7 +53,10 @@ export interface ProgressoSessao {
   seriesPlanejadas: number;
 }
 
-export function iniciarSessao(ficha: FichaTreino): SessaoTreino {
+export function iniciarSessao(
+  ficha: FichaTreino,
+  obterImagemUrl: (exercicioDefinicaoId: string | null) => string | null = () => null
+): SessaoTreino {
   const exerciciosAtivos = [...ficha.exercicios].sort((a, b) => a.ordem - b.ordem);
   if (exerciciosAtivos.length === 0) {
     throw new Error('A ficha precisa ter ao menos um exercício para iniciar o treino.');
@@ -72,6 +77,7 @@ export function iniciarSessao(ficha: FichaTreino): SessaoTreino {
       repeticoesMax: exercicio.repeticoesMax,
       cargaReferenciaKg: exercicio.cargaReferenciaKg,
       descansoSegundos: exercicio.descansoSegundos,
+      imagemUrl: obterImagemUrl(exercicio.exercicioDefinicaoId),
     })),
     series: [],
     status: 'em_andamento',

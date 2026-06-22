@@ -76,6 +76,7 @@ export function useExercicios(): EstadoExercicios {
         nome: item.nome,
         grupoMuscular: item.grupoMuscular,
         descricao: item.descricao,
+        imagemUrl: item.imagemUrl,
         isCustom: false,
         usuarioId: null,
         criadoEm: agora,

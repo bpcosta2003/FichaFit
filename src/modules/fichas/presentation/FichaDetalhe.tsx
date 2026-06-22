@@ -81,7 +81,7 @@ export function FichaDetalhe({ fichaId }: PropsFichaDetalhe) {
     return (
       <div className="flex flex-col gap-4 px-5 py-8 text-center">
         <p className="text-texto-suave">Ficha não encontrada.</p>
-        <BotaoGrande variante="secundaria" onClick={() => router.push('/treinos')}>
+        <BotaoGrande variante="secundaria" tamanho="medio" onClick={() => router.push('/treinos')}>
           Voltar para as fichas
         </BotaoGrande>
       </div>
@@ -161,13 +161,13 @@ export function FichaDetalhe({ fichaId }: PropsFichaDetalhe) {
           type="button"
           aria-label="Voltar"
           onClick={() => router.push('/treinos')}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-texto-suave active:bg-superficie"
+          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-texto-suave active:bg-superficie"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-6 w-6" aria-hidden="true">
             <path d="M15 6l-6 6 6 6" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
-        <h1 className="flex-1 font-titulo text-3xl font-bold uppercase leading-none tracking-tight text-texto">
+        <h1 className="min-w-0 flex-1 break-words font-titulo text-3xl font-bold uppercase leading-tight tracking-tight text-texto">
           {ficha.nome}
         </h1>
         <button
@@ -206,8 +206,15 @@ export function FichaDetalhe({ fichaId }: PropsFichaDetalhe) {
               {erroFicha}
             </p>
           )}
-          <BotaoGrande type="submit">Salvar ficha</BotaoGrande>
-          <BotaoGrande type="button" variante="secundaria" onClick={() => setEditandoFicha(false)}>
+          <BotaoGrande type="submit" tamanho="medio">
+            Salvar ficha
+          </BotaoGrande>
+          <BotaoGrande
+            type="button"
+            variante="secundaria"
+            tamanho="medio"
+            onClick={() => setEditandoFicha(false)}
+          >
             Cancelar
           </BotaoGrande>
         </form>
@@ -251,9 +258,9 @@ export function FichaDetalhe({ fichaId }: PropsFichaDetalhe) {
               type="button"
               aria-label={`Editar ${exercicio.nome}`}
               onClick={() => abrirEdicaoExercicio(exercicio)}
-              className="flex flex-1 flex-col gap-0.5 text-left"
+              className="flex min-w-0 flex-1 flex-col gap-0.5 text-left"
             >
-              <span className="font-titulo text-lg font-semibold uppercase tracking-tight text-texto">
+              <span className="break-words font-titulo text-lg font-semibold uppercase tracking-tight text-texto">
                 {exercicio.nome}
               </span>
               <span className="text-sm text-texto-suave">
@@ -263,7 +270,7 @@ export function FichaDetalhe({ fichaId }: PropsFichaDetalhe) {
                 · {exercicio.descansoSegundos}s descanso
               </span>
             </button>
-            <div className="flex flex-col">
+            <div className="flex shrink-0 flex-col">
               <button
                 type="button"
                 aria-label={`Mover ${exercicio.nome} para cima`}
@@ -287,7 +294,7 @@ export function FichaDetalhe({ fichaId }: PropsFichaDetalhe) {
               type="button"
               aria-label={`Remover ${exercicio.nome}`}
               onClick={() => void excluirExercicio(exercicio.id)}
-              className="min-h-toque min-w-toque text-erro"
+              className="min-h-toque min-w-toque shrink-0 text-erro"
             >
               ✕
             </button>
@@ -379,16 +386,21 @@ export function FichaDetalhe({ fichaId }: PropsFichaDetalhe) {
               {erro}
             </p>
           )}
-          <BotaoGrande type="submit">
+          <BotaoGrande type="submit" tamanho="medio">
             {exercicioEditandoId !== null ? 'Salvar exercício' : 'Adicionar exercício'}
           </BotaoGrande>
-          <BotaoGrande type="button" variante="secundaria" onClick={aoCancelarExercicio}>
+          <BotaoGrande
+            type="button"
+            variante="secundaria"
+            tamanho="medio"
+            onClick={aoCancelarExercicio}
+          >
             Cancelar
           </BotaoGrande>
         </form>
       ) : (
         <div className="flex flex-col gap-3">
-          <BotaoGrande variante="secundaria" onClick={() => setAdicionando(true)}>
+          <BotaoGrande variante="secundaria" tamanho="medio" onClick={() => setAdicionando(true)}>
             Adicionar exercício
           </BotaoGrande>
           <BotaoGrande
@@ -439,7 +451,11 @@ export function FichaDetalhe({ fichaId }: PropsFichaDetalhe) {
               </span>
               <p className="text-sm text-texto">{ficha.justificativaIA.nivelAssertividade}</p>
             </div>
-            <BotaoGrande variante="secundaria" onClick={() => setMostrandoJustificativa(false)}>
+            <BotaoGrande
+              variante="secundaria"
+              tamanho="medio"
+              onClick={() => setMostrandoJustificativa(false)}
+            >
               Fechar
             </BotaoGrande>
           </div>

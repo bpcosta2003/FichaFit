@@ -48,8 +48,11 @@ function CartaoFicha({ ficha, destaque, grupos, aoMoverParaGrupo }: CartaoFichaP
       }`}
     >
       <div className="flex items-center gap-3">
-        <Link href={`/treinos/${ficha.id}`} className="flex min-h-toque flex-1 flex-col gap-1">
-          <span className="font-titulo text-xl font-bold uppercase tracking-tight text-texto">
+        <Link
+          href={`/treinos/${ficha.id}`}
+          className="flex min-h-toque min-w-0 flex-1 flex-col gap-1"
+        >
+          <span className="break-words font-titulo text-xl font-bold uppercase tracking-tight text-texto">
             {ficha.nome}
           </span>
           {subtitulo !== '' && <span className="text-sm text-texto-suave">{subtitulo}</span>}
@@ -63,7 +66,7 @@ function CartaoFicha({ ficha, destaque, grupos, aoMoverParaGrupo }: CartaoFichaP
           <Link
             href={`/treinos/${ficha.id}/sessao`}
             aria-label={`Iniciar ${ficha.nome}`}
-            className="gradiente-fogo flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-black shadow-fogo active:scale-95"
+            className="gradiente-fogo flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-sobre-fogo shadow-fogo active:scale-95"
           >
             <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5" aria-hidden="true">
               <path d="M8 5v14l11-7z" />
@@ -171,7 +174,7 @@ export function FichaListagem() {
         <p className="font-titulo text-xs font-semibold uppercase tracking-[0.2em] text-fogo">
           {DIA_SEMANA.format(new Date())}
         </p>
-        <h1 className="font-titulo text-5xl font-bold uppercase leading-[0.9] tracking-tight text-texto">
+        <h1 className="font-titulo text-5xl font-bold uppercase leading-tight tracking-tight text-texto">
           Minhas
           <br />
           Fichas
@@ -273,8 +276,15 @@ export function FichaListagem() {
               {erroGrupo}
             </p>
           )}
-          <BotaoGrande type="submit">Criar grupo</BotaoGrande>
-          <BotaoGrande type="button" variante="secundaria" onClick={() => setCriandoGrupo(false)}>
+          <BotaoGrande type="submit" tamanho="medio">
+            Criar grupo
+          </BotaoGrande>
+          <BotaoGrande
+            type="button"
+            variante="secundaria"
+            tamanho="medio"
+            onClick={() => setCriandoGrupo(false)}
+          >
             Cancelar
           </BotaoGrande>
         </form>
@@ -308,8 +318,15 @@ export function FichaListagem() {
               {erro}
             </p>
           )}
-          <BotaoGrande type="submit">Criar ficha</BotaoGrande>
-          <BotaoGrande type="button" variante="secundaria" onClick={() => setCriando(false)}>
+          <BotaoGrande type="submit" tamanho="medio">
+            Criar ficha
+          </BotaoGrande>
+          <BotaoGrande
+            type="button"
+            variante="secundaria"
+            tamanho="medio"
+            onClick={() => setCriando(false)}
+          >
             Cancelar
           </BotaoGrande>
         </form>
@@ -320,7 +337,7 @@ export function FichaListagem() {
           type="button"
           aria-label="Nova ficha"
           onClick={() => setCriando(true)}
-          className="gradiente-fogo fixed bottom-24 right-5 z-30 flex h-16 w-16 items-center justify-center rounded-full text-3xl font-bold text-black shadow-fogo active:scale-95"
+          className="gradiente-fogo fixed bottom-24 right-5 z-30 flex h-16 w-16 items-center justify-center rounded-full text-3xl font-bold text-sobre-fogo shadow-fogo active:scale-95"
         >
           +
         </button>

@@ -121,14 +121,14 @@ export function PerfilPage() {
 
   return (
     <div className="flex flex-col gap-6 px-5 py-6">
-      <h1 className="font-titulo text-5xl font-bold uppercase leading-[0.9] tracking-tight text-texto">
+      <h1 className="font-titulo text-5xl font-bold uppercase leading-tight tracking-tight text-texto">
         Perfil
       </h1>
 
       <div className="flex items-center gap-4 rounded-2xl border border-borda bg-superficie p-4">
         <AvatarUsuario avatarId={avatarId} tamanho="md" />
-        <div className="flex flex-col">
-          <span className="font-titulo text-lg font-bold uppercase tracking-tight text-texto">
+        <div className="flex min-w-0 flex-col">
+          <span className="break-all font-titulo text-lg font-bold uppercase tracking-tight text-texto">
             {autenticado ? (usuario?.email ?? 'Atleta') : 'Atleta local'}
           </span>
           <span className="text-sm text-texto-suave">
@@ -252,6 +252,7 @@ export function PerfilPage() {
             <p className="text-sm font-medium text-texto-suave">Perfil de treino salvo.</p>
           )}
           <BotaoGrande
+            tamanho="medio"
             onClick={() => void aoSalvarPerfilTreino()}
             disabled={!perfilTreinoCompleto || salvandoTreino}
           >
@@ -276,7 +277,7 @@ export function PerfilPage() {
               <span className="font-semibold text-texto">Adicionar à Tela de Início</span>.
             </p>
           ) : (
-            <BotaoGrande onClick={() => void instalar()} disabled={!podeInstalar}>
+            <BotaoGrande tamanho="medio" onClick={() => void instalar()} disabled={!podeInstalar}>
               {podeInstalar ? 'Baixar o app' : 'Instalação indisponível neste navegador'}
             </BotaoGrande>
           )}
@@ -311,16 +312,16 @@ export function PerfilPage() {
         )}
         {autenticado ? (
           <>
-            <BotaoGrande onClick={() => void executarSync()} disabled={sincronizando}>
+            <BotaoGrande tamanho="medio" onClick={() => void executarSync()} disabled={sincronizando}>
               {sincronizando ? 'Sincronizando…' : 'Sincronizar agora'}
             </BotaoGrande>
-            <BotaoGrande variante="secundaria" onClick={() => void sair()}>
+            <BotaoGrande variante="secundaria" tamanho="medio" onClick={() => void sair()}>
               Sair da conta
             </BotaoGrande>
           </>
         ) : (
           <Link href="/login" className="block">
-            <BotaoGrande>Entrar para sincronizar</BotaoGrande>
+            <BotaoGrande tamanho="medio">Entrar para sincronizar</BotaoGrande>
           </Link>
         )}
       </section>

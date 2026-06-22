@@ -77,7 +77,7 @@ export function TelaLogin() {
               {erro}
             </p>
           )}
-          <BotaoGrande type="submit" disabled={estado === 'enviando'}>
+          <BotaoGrande type="submit" tamanho="medio" disabled={estado === 'enviando'}>
             {estado === 'enviando' ? 'Enviando…' : 'Enviar link de acesso'}
           </BotaoGrande>
         </form>

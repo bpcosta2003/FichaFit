@@ -40,7 +40,7 @@ export function CardExercicio({
             />
           </div>
         )}
-        <h2 className="font-titulo text-4xl font-bold uppercase leading-[0.95] tracking-tight text-texto">
+        <h2 className="min-w-0 flex-1 break-words font-titulo text-4xl font-bold uppercase leading-tight tracking-tight text-texto">
           {exercicio.nome}
         </h2>
       </div>

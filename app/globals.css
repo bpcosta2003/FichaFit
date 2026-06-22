@@ -11,6 +11,11 @@
   --cor-texto: #f5f0ea;
   --cor-texto-suave: #a39b92;
   --cor-borda: #2e2925;
+  /* Âmbar/fogo da marca — fixo nos dois temas. Disponível como CSS var para
+     uso em SVG (stroke) e em qualquer lugar fora do alcance do Tailwind. */
+  --cor-fogo: #f59e0b;
+  /* Texto/ícone legível por cima do gradiente âmbar (quase-preto nos 2 temas). */
+  --cor-sobre-fogo: #1a1613;
   color-scheme: dark;
 }
 
@@ -26,6 +31,18 @@
 
 html {
   -webkit-tap-highlight-color: transparent;
+}
+
+/* Foco visível apenas para navegação por teclado (não dispara no toque). */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role='radio']:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--cor-fogo);
+  outline-offset: 2px;
 }
 
 body {

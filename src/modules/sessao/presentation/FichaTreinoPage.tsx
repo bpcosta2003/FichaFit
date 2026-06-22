@@ -101,7 +101,7 @@ export function FichaTreinoPage({ fichaId }: PropsFichaTreinoPage) {
         <p className="text-lg text-texto">
           {erro ?? 'Não foi possível abrir esta sessão de treino.'}
         </p>
-        <BotaoGrande variante="secundaria" onClick={() => router.push('/treinos')}>
+        <BotaoGrande variante="secundaria" tamanho="medio" onClick={() => router.push('/treinos')}>
           Voltar para as fichas
         </BotaoGrande>
       </div>

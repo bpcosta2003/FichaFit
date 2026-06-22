@@ -23,7 +23,7 @@ export function AvatarUsuario({ avatarId, tamanho = 'md' }: PropsAvatarUsuario) 
     <img
       src={urlAvatar(avatar)}
       alt={`Avatar ${avatar.nome}`}
-      className={`${dimensoes[tamanho]} rounded-full bg-superficie-2 object-cover`}
+      className={`${dimensoes[tamanho]} shrink-0 rounded-full bg-superficie-2 object-cover`}
     />
   );
 }

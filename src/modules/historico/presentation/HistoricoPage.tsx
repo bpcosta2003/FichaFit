@@ -43,7 +43,7 @@ export function HistoricoPage() {
 
   return (
     <div className="flex flex-col gap-5 px-5 py-6">
-      <h1 className="font-titulo text-5xl font-bold uppercase leading-[0.9] tracking-tight text-texto">
+      <h1 className="font-titulo text-5xl font-bold uppercase leading-tight tracking-tight text-texto">
         Histórico
       </h1>
 
@@ -86,23 +86,23 @@ export function HistoricoPage() {
                   className="flex min-h-toque flex-col gap-2 rounded-2xl border border-borda bg-superficie p-4 active:bg-superficie-2"
                 >
                   <div className="flex items-baseline justify-between gap-2">
-                    <span className="font-titulo text-xl font-bold uppercase tracking-tight text-texto">
+                    <span className="min-w-0 break-words font-titulo text-xl font-bold uppercase tracking-tight text-texto">
                       {sessao.nomeFicha}
                     </span>
-                    <span className="text-sm text-texto-suave">
+                    <span className="shrink-0 text-sm text-texto-suave">
                       {formatarDataRelativa(sessao.iniciadaEm)} ·{' '}
                       {formatarDuracao(duracaoSegundos(sessao))}
                     </span>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    <span className="rounded-md bg-superficie-2 px-2.5 py-1 text-xs font-medium text-texto-suave">
+                    <span className="rounded-lg bg-superficie-2 px-2.5 py-1 text-xs font-medium text-texto-suave">
                       {sessao.exercicios.length} exercícios
                     </span>
-                    <span className="rounded-md bg-superficie-2 px-2.5 py-1 text-xs font-medium text-texto-suave">
+                    <span className="rounded-lg bg-superficie-2 px-2.5 py-1 text-xs font-medium text-texto-suave">
                       {sessao.series.length} séries
                     </span>
                     {sessao.status === 'cancelada' && (
-                      <span className="rounded-md bg-superficie-2 px-2.5 py-1 text-xs font-medium text-texto-suave">
+                      <span className="rounded-lg bg-superficie-2 px-2.5 py-1 text-xs font-medium text-texto-suave">
                         não concluído
                       </span>
                     )}

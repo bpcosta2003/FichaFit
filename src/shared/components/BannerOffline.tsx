@@ -12,7 +12,7 @@ export function BannerOffline() {
   return (
     <div
       role="status"
-      className="bg-fogo px-4 py-2 text-center text-sm font-semibold text-black"
+      className="bg-fogo px-4 py-2 text-center text-sm font-semibold text-sobre-fogo"
     >
       Você está offline — seus treinos continuam sendo salvos no aparelho.
     </div>

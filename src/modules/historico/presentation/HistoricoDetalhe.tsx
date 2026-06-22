@@ -59,7 +59,7 @@ export function HistoricoDetalhe({ sessaoId }: PropsHistoricoDetalhe) {
             type="button"
             aria-label="Voltar para o histórico"
             onClick={() => router.push('/historico')}
-            className="flex h-10 w-10 items-center justify-center rounded-full text-texto-suave active:bg-superficie"
+            className="flex h-12 w-12 items-center justify-center rounded-full text-texto-suave active:bg-superficie"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-6 w-6" aria-hidden="true">
               <path d="M15 6l-6 6 6 6" strokeLinecap="round" strokeLinejoin="round" />

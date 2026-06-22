@@ -96,6 +96,7 @@ function reconstruirExercicios(series: SerieRealizada[]): ExercicioSessao[] {
       repeticoesMax: Math.max(...lista.map((serie) => serie.repeticoes)),
       cargaReferenciaKg: null,
       descansoSegundos: 0,
+      imagemUrl: null,
     };
   });
 }

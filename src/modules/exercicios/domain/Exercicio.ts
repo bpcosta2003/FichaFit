@@ -7,6 +7,8 @@ export interface ExercicioDefinicao {
   nome: string;
   grupoMuscular: string | null;
   descricao: string | null;
+  // Foto estática de como executar o exercício (o wger não fornece GIFs).
+  imagemUrl: string | null;
   isCustom: boolean;
   usuarioId: string | null;
   criadoEm: string;
@@ -33,6 +35,7 @@ export function criarExercicioCustom(dados: NovoExercicioCustom): ExercicioDefin
     nome,
     grupoMuscular: dados.grupoMuscular?.trim() || null,
     descricao: dados.descricao?.trim() || null,
+    imagemUrl: null,
     isCustom: true,
     usuarioId: dados.usuarioId,
     criadoEm: agora,

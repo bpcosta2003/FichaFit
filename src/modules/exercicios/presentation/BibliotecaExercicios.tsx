@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useMemo, useState, type FormEvent } from 'react';
 
 import { useExercicios } from '@/modules/exercicios/application/useExercicios';
@@ -225,6 +226,17 @@ export function BibliotecaExercicios() {
             <p className="mt-1 text-sm font-medium uppercase tracking-wide text-fogo">
               {detalhe.grupoMuscular ?? 'Grupo não informado'}
             </p>
+            {detalhe.imagemUrl !== null && (
+              <div className="relative mt-4 h-48 w-full overflow-hidden rounded-xl bg-superficie-2">
+                <Image
+                  src={detalhe.imagemUrl}
+                  alt={`Demonstração do exercício ${detalhe.nome}`}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 448px) 100vw, 448px"
+                />
+              </div>
+            )}
             <p className="mt-4 text-texto-suave">
               {detalhe.descricao ?? 'Sem descrição disponível para este exercício.'}
             </p>

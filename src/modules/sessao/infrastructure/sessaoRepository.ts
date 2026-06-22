@@ -14,6 +14,7 @@ const esquemaExercicioSessao = z.object({
   repeticoesMax: z.number().int().min(1),
   cargaReferenciaKg: z.number().nullable(),
   descansoSegundos: z.number().int().min(0),
+  imagemUrl: z.string().nullable().default(null),
 });
 
 const esquemaSerie = z.object({

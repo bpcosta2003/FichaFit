@@ -33,10 +33,19 @@ const esquemaCategoria = z.object({
   id: z.number(),
 });
 
+// O wger só fornece fotos estáticas (sem GIF/animação) e com cobertura
+// parcial — nem todo exercício tem imagem. Esquema permissivo: qualquer
+// formato inesperado aqui só resulta em imagemUrl null, nunca falha o parse.
+const esquemaImagem = z.object({
+  image: z.string().optional().nullable(),
+  is_main: z.boolean().optional(),
+});
+
 const esquemaExercicioWger = z.object({
   id: z.number(),
   category: esquemaCategoria.optional().nullable(),
   translations: z.array(esquemaTraducao).optional().default([]),
+  images: z.array(esquemaImagem).optional().default([]),
 });
 
 const esquemaRespostaWger = z.object({
@@ -49,6 +58,7 @@ export interface ExercicioWger {
   nome: string;
   grupoMuscular: string | null;
   descricao: string | null;
+  imagemUrl: string | null;
 }
 
 function removerHtml(texto: string): string {
@@ -65,6 +75,14 @@ function escolherTraducao(
     }
   }
   return null;
+}
+
+function escolherImagem(imagens: z.infer<typeof esquemaImagem>[]): string | null {
+  const principal = imagens.find((imagem) => imagem.is_main && imagem.image);
+  if (principal?.image) {
+    return principal.image;
+  }
+  return imagens.find((imagem) => imagem.image)?.image ?? null;
 }
 
 async function buscarPagina(pagina: number): Promise<{
@@ -97,6 +115,7 @@ async function buscarPagina(pagina: number): Promise<{
       grupoMuscular:
         item.category != null ? (GRUPOS_MUSCULARES[item.category.id] ?? null) : null,
       descricao: traducao?.description ? removerHtml(traducao.description) || null : null,
+      imagemUrl: escolherImagem(item.images),
     });
   }
   return { exercicios, temProxima: corpo.next !== null };

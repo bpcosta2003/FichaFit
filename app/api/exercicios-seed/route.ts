@@ -70,6 +70,7 @@ export async function POST(requisicao: Request): Promise<NextResponse> {
         nome: exercicio.nome,
         grupo_muscular: exercicio.grupoMuscular,
         descricao: exercicio.descricao,
+        imagem_url: exercicio.imagemUrl,
         is_custom: false,
         usuario_id: null,
         criado_em: agora,

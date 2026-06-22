@@ -2,11 +2,12 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
-// Evento beforeinstallprompt — não está nos tipos padrão do DOM.
-interface EventoInstalacao extends Event {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
-}
+import {
+  consumirEventoInstalacao,
+  type EventoInstalacaoPwa,
+  inscreverEventoInstalacao,
+  obterEventoInstalacaoCapturado,
+} from '@/shared/lib/capturarInstalacaoPwa';
 
 export interface EstadoInstalarApp {
   // O navegador disponibilizou o prompt nativo de instalação.
@@ -36,28 +37,25 @@ function ehIOS(): boolean {
 }
 
 // Captura o evento de instalação do PWA e expõe uma ação para dispará-lo.
+// O evento em si é capturado em module scope (ver capturarInstalacaoPwa.ts)
+// o mais cedo possível — este hook só lê/observa esse estado compartilhado,
+// para não perder o evento quando montado tarde (ex: páginas dynamic ssr:false).
 export function useInstalarApp(): EstadoInstalarApp {
-  const [eventoInstalacao, setEventoInstalacao] = useState<EventoInstalacao | null>(null);
+  const [eventoInstalacao, setEventoInstalacao] = useState<EventoInstalacaoPwa | null>(
+    obterEventoInstalacaoCapturado
+  );
   const [jaInstalado, setJaInstalado] = useState(false);
 
   useEffect(() => {
     setJaInstalado(estaEmModoStandalone());
+    setEventoInstalacao(obterEventoInstalacaoCapturado());
 
-    const aoDisponibilizar = (evento: Event): void => {
-      evento.preventDefault();
-      setEventoInstalacao(evento as EventoInstalacao);
-    };
-    const aoInstalar = (): void => {
-      setEventoInstalacao(null);
-      setJaInstalado(true);
-    };
-
-    window.addEventListener('beforeinstallprompt', aoDisponibilizar);
-    window.addEventListener('appinstalled', aoInstalar);
-    return () => {
-      window.removeEventListener('beforeinstallprompt', aoDisponibilizar);
-      window.removeEventListener('appinstalled', aoInstalar);
-    };
+    return inscreverEventoInstalacao((evento) => {
+      setEventoInstalacao(evento);
+      if (evento === null) {
+        setJaInstalado(estaEmModoStandalone());
+      }
+    });
   }, []);
 
   const instalar = useCallback(async (): Promise<void> => {
@@ -72,6 +70,7 @@ export function useInstalarApp(): EstadoInstalarApp {
       }
     } finally {
       // O prompt só pode ser usado uma vez.
+      consumirEventoInstalacao();
       setEventoInstalacao(null);
     }
   }, [eventoInstalacao]);

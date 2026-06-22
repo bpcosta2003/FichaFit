@@ -13,6 +13,10 @@ export interface EventoInstalacaoPwa extends Event {
 type Ouvinte = (evento: EventoInstalacaoPwa | null) => void;
 
 let eventoCapturado: EventoInstalacaoPwa | null = null;
+// O evento appinstalled chegou nesta sessão. Guardado à parte porque, logo após
+// instalar, a página ainda roda na ABA do navegador (não na janela do PWA), então
+// display-mode: standalone continua falso — não dá para inferir "instalado" só por ele.
+let appFoiInstalado = false;
 const ouvintes = new Set<Ouvinte>();
 
 function notificar(evento: EventoInstalacaoPwa | null): void {
@@ -28,6 +32,7 @@ function aoDisponibilizar(evento: Event): void {
 }
 
 function aoInstalar(): void {
+  appFoiInstalado = true;
   eventoCapturado = null;
   notificar(null);
 }
@@ -39,6 +44,11 @@ if (typeof window !== 'undefined') {
 
 export function obterEventoInstalacaoCapturado(): EventoInstalacaoPwa | null {
   return eventoCapturado;
+}
+
+// O app foi instalado nesta sessão (evento appinstalled já disparou).
+export function obterAppFoiInstalado(): boolean {
+  return appFoiInstalado;
 }
 
 export function inscreverEventoInstalacao(ouvinte: Ouvinte): () => void {

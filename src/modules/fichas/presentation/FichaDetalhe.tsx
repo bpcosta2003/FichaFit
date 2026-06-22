@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState, type FormEvent } from 'react';
+import { Fragment, useState, type FormEvent } from 'react';
 
 import { useFicha } from '@/modules/fichas/application/useFichas';
 import { exerciciosOrdenados, type ExercicioFicha } from '@/modules/fichas/domain/FichaTreino';
@@ -154,6 +154,106 @@ export function FichaDetalhe({ fichaId }: PropsFichaDetalhe) {
     router.replace('/treinos');
   };
 
+  const abrirAdicaoExercicio = (): void => {
+    setFormulario(FORMULARIO_VAZIO);
+    setExercicioEditandoId(null);
+    setErro(null);
+    setAdicionando(true);
+  };
+
+  const formularioExercicio = (
+    <form
+      onSubmit={(evento) => void aoAdicionar(evento)}
+      className="flex flex-col gap-3 rounded-2xl border border-borda bg-superficie p-4"
+    >
+      <SeletorExercicio
+        valor={{ exercicioDefinicaoId: formulario.exercicioDefinicaoId, nome: formulario.nome }}
+        aoSelecionar={({ exercicioDefinicaoId, nome }) =>
+          setFormulario({ ...formulario, exercicioDefinicaoId, nome })
+        }
+      />
+      <div className="grid grid-cols-2 gap-3">
+        <label className="flex flex-col gap-1 text-sm font-medium text-texto-suave">
+          Séries
+          <input
+            type="number"
+            inputMode="numeric"
+            min={1}
+            value={formulario.series}
+            onChange={(evento) =>
+              setFormulario({ ...formulario, series: Number(evento.target.value) })
+            }
+            className={CLASSE_INPUT}
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-sm font-medium text-texto-suave">
+          Descanso (s)
+          <input
+            type="number"
+            inputMode="numeric"
+            min={0}
+            step={15}
+            value={formulario.descansoSegundos}
+            onChange={(evento) =>
+              setFormulario({ ...formulario, descansoSegundos: Number(evento.target.value) })
+            }
+            className={CLASSE_INPUT}
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-sm font-medium text-texto-suave">
+          Reps mín.
+          <input
+            type="number"
+            inputMode="numeric"
+            min={1}
+            value={formulario.repeticoesMin}
+            onChange={(evento) =>
+              setFormulario({ ...formulario, repeticoesMin: Number(evento.target.value) })
+            }
+            className={CLASSE_INPUT}
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-sm font-medium text-texto-suave">
+          Reps máx.
+          <input
+            type="number"
+            inputMode="numeric"
+            min={1}
+            value={formulario.repeticoesMax}
+            onChange={(evento) =>
+              setFormulario({ ...formulario, repeticoesMax: Number(evento.target.value) })
+            }
+            className={CLASSE_INPUT}
+          />
+        </label>
+      </div>
+      <label className="flex flex-col gap-1 text-sm font-medium text-texto-suave">
+        Carga de referência (kg) — opcional
+        <input
+          type="text"
+          inputMode="decimal"
+          placeholder="ex: 80"
+          value={formulario.cargaReferenciaKg}
+          onChange={(evento) =>
+            setFormulario({ ...formulario, cargaReferenciaKg: evento.target.value })
+          }
+          className={CLASSE_INPUT}
+        />
+      </label>
+      {erro !== null && (
+        <p role="alert" className="text-sm font-medium text-erro">
+          {erro}
+        </p>
+      )}
+      <BotaoGrande type="submit" tamanho="medio">
+        {exercicioEditandoId !== null ? 'Salvar exercício' : 'Adicionar exercício'}
+      </BotaoGrande>
+      <BotaoGrande type="button" variante="secundaria" tamanho="medio" onClick={aoCancelarExercicio}>
+        Cancelar
+      </BotaoGrande>
+    </form>
+  );
+
   return (
     <div className="flex flex-col gap-5 px-5 py-6">
       <header className="flex items-center gap-2">
@@ -250,10 +350,8 @@ export function FichaDetalhe({ fichaId }: PropsFichaDetalhe) {
 
       <ul className="flex flex-col gap-3">
         {exercicios.map((exercicio, indice) => (
-          <li
-            key={exercicio.id}
-            className="flex items-center gap-3 rounded-2xl border border-borda bg-superficie p-4"
-          >
+          <Fragment key={exercicio.id}>
+            <li className="flex items-center gap-3 rounded-2xl border border-borda bg-superficie p-4">
             <button
               type="button"
               aria-label={`Editar ${exercicio.nome}`}
@@ -298,109 +396,19 @@ export function FichaDetalhe({ fichaId }: PropsFichaDetalhe) {
             >
               ✕
             </button>
-          </li>
+            </li>
+            {adicionando && exercicioEditandoId === exercicio.id && (
+              <li className="list-none">{formularioExercicio}</li>
+            )}
+          </Fragment>
         ))}
       </ul>
 
-      {adicionando ? (
-        <form
-          onSubmit={(evento) => void aoAdicionar(evento)}
-          className="flex flex-col gap-3 rounded-2xl border border-borda bg-superficie p-4"
-        >
-          <SeletorExercicio
-            valor={{ exercicioDefinicaoId: formulario.exercicioDefinicaoId, nome: formulario.nome }}
-            aoSelecionar={({ exercicioDefinicaoId, nome }) =>
-              setFormulario({ ...formulario, exercicioDefinicaoId, nome })
-            }
-          />
-          <div className="grid grid-cols-2 gap-3">
-            <label className="flex flex-col gap-1 text-sm font-medium text-texto-suave">
-              Séries
-              <input
-                type="number"
-                inputMode="numeric"
-                min={1}
-                value={formulario.series}
-                onChange={(evento) =>
-                  setFormulario({ ...formulario, series: Number(evento.target.value) })
-                }
-                className={CLASSE_INPUT}
-              />
-            </label>
-            <label className="flex flex-col gap-1 text-sm font-medium text-texto-suave">
-              Descanso (s)
-              <input
-                type="number"
-                inputMode="numeric"
-                min={0}
-                step={15}
-                value={formulario.descansoSegundos}
-                onChange={(evento) =>
-                  setFormulario({ ...formulario, descansoSegundos: Number(evento.target.value) })
-                }
-                className={CLASSE_INPUT}
-              />
-            </label>
-            <label className="flex flex-col gap-1 text-sm font-medium text-texto-suave">
-              Reps mín.
-              <input
-                type="number"
-                inputMode="numeric"
-                min={1}
-                value={formulario.repeticoesMin}
-                onChange={(evento) =>
-                  setFormulario({ ...formulario, repeticoesMin: Number(evento.target.value) })
-                }
-                className={CLASSE_INPUT}
-              />
-            </label>
-            <label className="flex flex-col gap-1 text-sm font-medium text-texto-suave">
-              Reps máx.
-              <input
-                type="number"
-                inputMode="numeric"
-                min={1}
-                value={formulario.repeticoesMax}
-                onChange={(evento) =>
-                  setFormulario({ ...formulario, repeticoesMax: Number(evento.target.value) })
-                }
-                className={CLASSE_INPUT}
-              />
-            </label>
-          </div>
-          <label className="flex flex-col gap-1 text-sm font-medium text-texto-suave">
-            Carga de referência (kg) — opcional
-            <input
-              type="text"
-              inputMode="decimal"
-              placeholder="ex: 80"
-              value={formulario.cargaReferenciaKg}
-              onChange={(evento) =>
-                setFormulario({ ...formulario, cargaReferenciaKg: evento.target.value })
-              }
-              className={CLASSE_INPUT}
-            />
-          </label>
-          {erro !== null && (
-            <p role="alert" className="text-sm font-medium text-erro">
-              {erro}
-            </p>
-          )}
-          <BotaoGrande type="submit" tamanho="medio">
-            {exercicioEditandoId !== null ? 'Salvar exercício' : 'Adicionar exercício'}
-          </BotaoGrande>
-          <BotaoGrande
-            type="button"
-            variante="secundaria"
-            tamanho="medio"
-            onClick={aoCancelarExercicio}
-          >
-            Cancelar
-          </BotaoGrande>
-        </form>
-      ) : (
+      {adicionando && exercicioEditandoId === null && formularioExercicio}
+
+      {!adicionando && (
         <div className="flex flex-col gap-3">
-          <BotaoGrande variante="secundaria" tamanho="medio" onClick={() => setAdicionando(true)}>
+          <BotaoGrande variante="secundaria" tamanho="medio" onClick={abrirAdicaoExercicio}>
             Adicionar exercício
           </BotaoGrande>
           <BotaoGrande

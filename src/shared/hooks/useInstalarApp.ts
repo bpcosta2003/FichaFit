@@ -6,6 +6,7 @@ import {
   consumirEventoInstalacao,
   type EventoInstalacaoPwa,
   inscreverEventoInstalacao,
+  obterAppFoiInstalado,
   obterEventoInstalacaoCapturado,
 } from '@/shared/lib/capturarInstalacaoPwa';
 
@@ -47,13 +48,15 @@ export function useInstalarApp(): EstadoInstalarApp {
   const [jaInstalado, setJaInstalado] = useState(false);
 
   useEffect(() => {
-    setJaInstalado(estaEmModoStandalone());
+    setJaInstalado(estaEmModoStandalone() || obterAppFoiInstalado());
     setEventoInstalacao(obterEventoInstalacaoCapturado());
 
     return inscreverEventoInstalacao((evento) => {
       setEventoInstalacao(evento);
       if (evento === null) {
-        setJaInstalado(estaEmModoStandalone());
+        // Pode ter vindo do appinstalled — não rebaixar para falso só porque
+        // ainda estamos na aba do navegador (display-mode standalone é falso lá).
+        setJaInstalado(estaEmModoStandalone() || obterAppFoiInstalado());
       }
     });
   }, []);

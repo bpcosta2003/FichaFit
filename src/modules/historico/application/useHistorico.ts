@@ -4,24 +4,14 @@ import { useLiveQuery } from 'dexie-react-hooks';
 
 import { useAuth } from '@/modules/auth/application/useAuth';
 import type { SessaoTreino } from '@/modules/sessao/domain/SessaoTreino';
-import {
-  listarSessoesConcluidas,
-  obterSessao,
-} from '@/modules/sessao/infrastructure/sessaoRepository';
+import { obterSessao } from '@/modules/sessao/infrastructure/sessaoRepository';
+import { useSessoesConcluidas, type EstadoSessoesConcluidas } from './useSessoesConcluidas';
 
-export interface EstadoHistorico {
-  sessoes: SessaoTreino[];
-  carregando: boolean;
-}
+export type EstadoHistorico = EstadoSessoesConcluidas;
 
 // Histórico completo, sem limite de data.
 export function useHistorico(): EstadoHistorico {
-  const { usuarioId, carregando: carregandoAuth } = useAuth();
-  const sessoes = useLiveQuery(() => listarSessoesConcluidas(usuarioId), [usuarioId]);
-  return {
-    sessoes: sessoes ?? [],
-    carregando: carregandoAuth || sessoes === undefined,
-  };
+  return useSessoesConcluidas();
 }
 
 export interface EstadoSessaoHistorico {

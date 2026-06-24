@@ -97,6 +97,7 @@ function reconstruirExercicios(series: SerieRealizada[]): ExercicioSessao[] {
       cargaReferenciaKg: null,
       descansoSegundos: 0,
       imagemUrl: null,
+      grupoMuscular: null,
     };
   });
 }

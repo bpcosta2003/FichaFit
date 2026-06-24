@@ -17,9 +17,19 @@ export interface ExercicioSessao {
   repeticoesMax: number;
   cargaReferenciaKg: number | null;
   descansoSegundos: number;
-  // Foto de como executar o exercício — vem do catálogo, não da ficha.
+  // Vêm do catálogo (não da ficha) — anexados ao iniciar a sessão.
   imagemUrl: string | null;
+  grupoMuscular: string | null;
 }
+
+// Dados do catálogo de exercícios anexados a cada exercício da sessão.
+// Resolvidos fora do domínio (a camada application consulta o Dexie).
+export interface DadosCatalogoExercicio {
+  imagemUrl: string | null;
+  grupoMuscular: string | null;
+}
+
+const SEM_DADOS_CATALOGO: DadosCatalogoExercicio = { imagemUrl: null, grupoMuscular: null };
 
 export interface SerieRealizada {
   id: string;
@@ -55,7 +65,9 @@ export interface ProgressoSessao {
 
 export function iniciarSessao(
   ficha: FichaTreino,
-  obterImagemUrl: (exercicioDefinicaoId: string | null) => string | null = () => null
+  obterDadosCatalogo: (
+    exercicioDefinicaoId: string | null
+  ) => DadosCatalogoExercicio = () => SEM_DADOS_CATALOGO
 ): SessaoTreino {
   const exerciciosAtivos = [...ficha.exercicios].sort((a, b) => a.ordem - b.ordem);
   if (exerciciosAtivos.length === 0) {
@@ -68,17 +80,21 @@ export function iniciarSessao(
     usuarioId: ficha.usuarioId,
     fichaId: ficha.id,
     nomeFicha: ficha.nome,
-    exercicios: exerciciosAtivos.map((exercicio, indice) => ({
-      exercicioFichaId: exercicio.id,
-      nome: exercicio.nome,
-      ordem: indice,
-      seriesPlanejadas: exercicio.series,
-      repeticoesMin: exercicio.repeticoesMin,
-      repeticoesMax: exercicio.repeticoesMax,
-      cargaReferenciaKg: exercicio.cargaReferenciaKg,
-      descansoSegundos: exercicio.descansoSegundos,
-      imagemUrl: obterImagemUrl(exercicio.exercicioDefinicaoId),
-    })),
+    exercicios: exerciciosAtivos.map((exercicio, indice) => {
+      const dados = obterDadosCatalogo(exercicio.exercicioDefinicaoId);
+      return {
+        exercicioFichaId: exercicio.id,
+        nome: exercicio.nome,
+        ordem: indice,
+        seriesPlanejadas: exercicio.series,
+        repeticoesMin: exercicio.repeticoesMin,
+        repeticoesMax: exercicio.repeticoesMax,
+        cargaReferenciaKg: exercicio.cargaReferenciaKg,
+        descansoSegundos: exercicio.descansoSegundos,
+        imagemUrl: dados.imagemUrl,
+        grupoMuscular: dados.grupoMuscular,
+      };
+    }),
     series: [],
     status: 'em_andamento',
     iniciadaEm: agora,

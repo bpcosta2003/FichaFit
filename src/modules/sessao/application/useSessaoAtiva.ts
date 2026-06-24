@@ -4,7 +4,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { useCallback, useState } from 'react';
 
 import { useAuth } from '@/modules/auth/application/useAuth';
-import { obterImagensPorIds } from '@/modules/exercicios/infrastructure/exercicioRepository';
+import { obterDadosCatalogoPorIds } from '@/modules/exercicios/infrastructure/exercicioRepository';
 import { obterFicha } from '@/modules/fichas/infrastructure/fichaRepository';
 import { sincronizar } from '@/shared/sync/syncEngine';
 import {
@@ -68,12 +68,14 @@ export function useSessaoAtiva(fichaId: string): EstadoSessaoAtiva {
         setErro('Ficha não encontrada.');
         return;
       }
-      const imagensPorId = await obterImagensPorIds(
+      const dadosPorId = await obterDadosCatalogoPorIds(
         ficha.exercicios.map((exercicio) => exercicio.exercicioDefinicaoId)
       );
       await salvarSessao(
         iniciarSessao(ficha, (exercicioDefinicaoId) =>
-          exercicioDefinicaoId !== null ? imagensPorId.get(exercicioDefinicaoId) ?? null : null
+          exercicioDefinicaoId !== null
+            ? dadosPorId.get(exercicioDefinicaoId) ?? { imagemUrl: null, grupoMuscular: null }
+            : { imagemUrl: null, grupoMuscular: null }
         )
       );
     } catch (causa) {

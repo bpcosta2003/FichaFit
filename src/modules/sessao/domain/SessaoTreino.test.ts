@@ -45,6 +45,21 @@ describe('iniciarSessao', () => {
     const fichaVazia = criarFicha({ nome: 'Vazia', usuarioId: 'usuario-teste' });
     expect(() => iniciarSessao(fichaVazia)).toThrow(/ao menos um exercício/);
   });
+
+  it('deixa imagem e grupo nulos quando não há resolver de catálogo', () => {
+    const sessao = iniciarSessao(fichaComExercicios());
+    expect(sessao.exercicios[0]?.imagemUrl).toBeNull();
+    expect(sessao.exercicios[0]?.grupoMuscular).toBeNull();
+  });
+
+  it('anexa imagem e grupo do catálogo via resolver', () => {
+    const sessao = iniciarSessao(fichaComExercicios(), () => ({
+      imagemUrl: 'https://wger.de/foto.png',
+      grupoMuscular: 'Peito',
+    }));
+    expect(sessao.exercicios[0]?.imagemUrl).toBe('https://wger.de/foto.png');
+    expect(sessao.exercicios[0]?.grupoMuscular).toBe('Peito');
+  });
 });
 
 describe('registrarSerie', () => {

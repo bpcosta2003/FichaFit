@@ -68,21 +68,31 @@ export async function obterWgerIdsExistentes(): Promise<Set<number>> {
   );
 }
 
-// Mapa exercicioDefinicaoId -> imagemUrl — usado ao iniciar uma sessão, para
-// anexar a foto do catálogo a cada exercício (a ficha não guarda essa foto).
-export async function obterImagensPorIds(
+// Dados do catálogo anexados a cada exercício ao iniciar/exibir uma sessão
+// (a ficha não guarda nem a foto nem o grupo muscular).
+export interface DadosCatalogoExercicio {
+  imagemUrl: string | null;
+  grupoMuscular: string | null;
+}
+
+// Mapa exercicioDefinicaoId -> { imagemUrl, grupoMuscular } em uma só passada
+// (bulkGet, sem N+1). Usado para anexar dados do catálogo aos exercícios.
+export async function obterDadosCatalogoPorIds(
   ids: Array<string | null>
-): Promise<Map<string, string | null>> {
+): Promise<Map<string, DadosCatalogoExercicio>> {
   const idsValidos = Array.from(new Set(ids.filter((id): id is string => id !== null)));
   const brutos = await db.exercicioDefinicoes.bulkGet(idsValidos);
-  const mapa = new Map<string, string | null>();
+  const mapa = new Map<string, DadosCatalogoExercicio>();
   brutos.forEach((bruto, indice) => {
     const id = idsValidos[indice];
     if (id === undefined) {
       return;
     }
     const exercicio = bruto !== undefined ? validarExercicio(bruto) : null;
-    mapa.set(id, exercicio?.imagemUrl ?? null);
+    mapa.set(id, {
+      imagemUrl: exercicio?.imagemUrl ?? null,
+      grupoMuscular: exercicio?.grupoMuscular ?? null,
+    });
   });
   return mapa;
 }

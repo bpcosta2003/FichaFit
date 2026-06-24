@@ -3,8 +3,11 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
+import { useProgressaoCarga } from '@/modules/sessao/application/useProgressaoCarga';
 import { useSessaoAtiva } from '@/modules/sessao/application/useSessaoAtiva';
 import { seriesDoExercicio } from '@/modules/sessao/domain/SessaoTreino';
+import type { SugestaoCarga } from '@/modules/sessao/domain/progressaoCarga';
+import { AvisoProgressao } from '@/shared/components/AvisoProgressao';
 import { BotaoGrande } from '@/shared/components/BotaoGrande';
 import { CardExercicio } from '@/shared/components/CardExercicio';
 import { LogadorSerie } from '@/shared/components/LogadorSerie';
@@ -40,8 +43,10 @@ export function FichaTreinoPage({ fichaId }: PropsFichaTreinoPage) {
     cancelar,
   } = useSessaoAtiva(fichaId);
   const timer = useTimer();
+  const { sugerir: sugerirProgressao, carregando: carregandoProgressao } = useProgressaoCarga();
   const [repeticoes, setRepeticoes] = useState(8);
   const [pesoKg, setPesoKg] = useState(0);
+  const [sugestaoProgressao, setSugestaoProgressao] = useState<SugestaoCarga | null>(null);
   const [confirmandoSaida, setConfirmandoSaida] = useState(false);
   const jaIniciou = useRef(false);
 
@@ -56,14 +61,30 @@ export function FichaTreinoPage({ fichaId }: PropsFichaTreinoPage) {
   const exercicioId = exercicio?.exercicioFichaId ?? null;
   const sugerirPesoRef = useRef(sugerirPeso);
   sugerirPesoRef.current = sugerirPeso;
+  const sugerirProgressaoRef = useRef(sugerirProgressao);
+  sugerirProgressaoRef.current = sugerirProgressao;
   const repeticoesMinRef = useRef(exercicio?.repeticoesMin ?? 8);
   repeticoesMinRef.current = exercicio?.repeticoesMin ?? 8;
+  const cargaReferenciaRef = useRef(exercicio?.cargaReferenciaKg ?? null);
+  cargaReferenciaRef.current = exercicio?.cargaReferenciaKg ?? null;
+  // carregandoProgressao entra nas deps para reaplicar o prefill quando o
+  // histórico (Dexie) terminar de carregar.
   useEffect(() => {
-    if (exercicioId !== null) {
-      setRepeticoes(repeticoesMinRef.current);
-      setPesoKg(sugerirPesoRef.current(exercicioId));
+    if (exercicioId === null) {
+      return;
     }
-  }, [exercicioId, seriesFeitas]);
+    setRepeticoes(repeticoesMinRef.current);
+    if (seriesFeitas === 0) {
+      // Primeira série: sugere a carga com base na última sessão concluída.
+      const sugestao = sugerirProgressaoRef.current(exercicioId, cargaReferenciaRef.current);
+      setPesoKg(sugestao.pesoKg);
+      setSugestaoProgressao(sugestao);
+    } else {
+      // Séries seguintes: mantém o peso da última série desta sessão.
+      setPesoKg(sugerirPesoRef.current(exercicioId));
+      setSugestaoProgressao(null);
+    }
+  }, [exercicioId, seriesFeitas, carregandoProgressao]);
 
   const aoRegistrar = async (): Promise<void> => {
     if (exercicio === null || progresso === null) {
@@ -182,13 +203,22 @@ export function FichaTreinoPage({ fichaId }: PropsFichaTreinoPage) {
         ) : (
           exercicio !== null &&
           progresso !== null && (
-            <CardExercicio
-              exercicio={exercicio}
-              indice={progresso.exerciciosConcluidos}
-              totalExercicios={progresso.totalExercicios}
-              seriesFeitas={seriesFeitas}
-              seriesRegistradas={seriesAtuais}
-            />
+            <div className="flex flex-col gap-4">
+              <CardExercicio
+                exercicio={exercicio}
+                indice={progresso.exerciciosConcluidos}
+                totalExercicios={progresso.totalExercicios}
+                seriesFeitas={seriesFeitas}
+                seriesRegistradas={seriesAtuais}
+              />
+              {seriesFeitas === 0 && sugestaoProgressao !== null && (
+                <AvisoProgressao
+                  motivo={sugestaoProgressao.motivo}
+                  pesoKg={sugestaoProgressao.pesoKg}
+                  pesoAnteriorKg={sugestaoProgressao.pesoAnteriorKg}
+                />
+              )}
+            </div>
           )
         )}
       </main>

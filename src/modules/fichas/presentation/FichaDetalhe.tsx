@@ -4,7 +4,12 @@ import { useRouter } from 'next/navigation';
 import { Fragment, useState, type FormEvent } from 'react';
 
 import { useFicha } from '@/modules/fichas/application/useFichas';
+import { useGruposDaFicha } from '@/modules/fichas/application/useGruposDaFicha';
 import { exerciciosOrdenados, type ExercicioFicha } from '@/modules/fichas/domain/FichaTreino';
+import { useAvisoDescanso } from '@/modules/sessao/application/useAvisoDescanso';
+import { useDeteccaoPlato } from '@/modules/sessao/application/useDeteccaoPlato';
+import { AvisoDescansoGrupos } from '@/shared/components/AvisoDescansoGrupos';
+import { BadgePlato } from '@/shared/components/BadgePlato';
 import { BotaoGrande } from '@/shared/components/BotaoGrande';
 import { ModalConfirmacao } from '@/shared/components/ModalConfirmacao';
 import { SeletorExercicio } from '@/shared/components/SeletorExercicio';
@@ -72,6 +77,12 @@ export function FichaDetalhe({ fichaId }: PropsFichaDetalhe) {
   const [nomeFicha, setNomeFicha] = useState('');
   const [descricaoFicha, setDescricaoFicha] = useState('');
   const [erroFicha, setErroFicha] = useState<string | null>(null);
+
+  // Insights (hooks chamados sempre, antes de qualquer return — toleram ficha nula).
+  const idsExercicios = ficha ? exerciciosOrdenados(ficha).map((exercicio) => exercicio.id) : [];
+  const { platosPorId } = useDeteccaoPlato(idsExercicios);
+  const { grupos } = useGruposDaFicha(ficha);
+  const { gruposRecentes } = useAvisoDescanso(grupos);
 
   if (carregando) {
     return <p className="px-5 py-8 text-center text-texto-suave">Carregando ficha…</p>;
@@ -340,6 +351,8 @@ export function FichaDetalhe({ fichaId }: PropsFichaDetalhe) {
         </button>
       )}
 
+      <AvisoDescansoGrupos gruposRecentes={gruposRecentes} />
+
       {exercicios.length === 0 && !adicionando && (
         <div className="flex flex-col items-center gap-3 rounded-2xl border border-borda bg-superficie px-6 py-8 text-center">
           <p className="text-texto-suave">
@@ -367,6 +380,7 @@ export function FichaDetalhe({ fichaId }: PropsFichaDetalhe) {
                   ` · ${formatarPesoKg(exercicio.cargaReferenciaKg)}`}{' '}
                 · {exercicio.descansoSegundos}s descanso
               </span>
+              <BadgePlato emPlato={platosPorId.get(exercicio.id) ?? false} />
             </button>
             <div className="flex shrink-0 flex-col">
               <button

@@ -15,6 +15,7 @@ const esquemaExercicioSessao = z.object({
   cargaReferenciaKg: z.number().nullable(),
   descansoSegundos: z.number().int().min(0),
   imagemUrl: z.string().nullable().default(null),
+  grupoMuscular: z.string().nullable().default(null),
 });
 
 const esquemaSerie = z.object({
